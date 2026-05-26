@@ -435,9 +435,9 @@
 
             {/* --- CONTENU PRINCIPAL (ONGLETS) --- */}
             {tab === "saisie" ? (
-              gameMode === "libre" 
-                ? <RoundInputClassic players={players} roundNumber={rounds.length + 1} onValidate={addRound} />
-                : <RoundInputTarot players={players} roundNumber={rounds.length + 1} onValidate={addRound} />
+              gameMode === "classique" ? <RoundInputClassic players={players} roundNumber={rounds.length + 1} onValidate={addRound} />
+              : gameMode === "tarot" ? <RoundInputTarot players={players} roundNumber={rounds.length + 1} onValidate={addRound} />
+              : <RoundInputBelote players={players} roundNumber={rounds.length + 1} onValidate={addRound} />
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
                 <div style={{ background: "rgba(0,0,0,0.35)", border: "1px solid #2d5a3d", borderRadius: "14px", padding: "16px" }}>
