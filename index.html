@@ -3,12 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Scoreboard React</title>
+  <title>Scoreboard React - Tarot</title>
   
   <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  
   <script src="https://unpkg.com/prop-types/prop-types.js"></script>
   <script src="https://unpkg.com/recharts@2.1.9/umd/Recharts.js"></script>
 
@@ -27,7 +26,6 @@
     const { useState, useRef, useEffect } = React;
     const { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } = window.Recharts;
 
-    // ── Suits & palette ──────────────────────────────────────────────────────────
     const SUITS = ["♠", "♥", "♦", "♣", "♠", "♥", "♦", "♣", "♠", "♥"];
     const SUIT_COLORS = [
       { suit: "♠", bg: "#E2E8F0", text: "#1e293b", accent: "#94a3b8" },
@@ -44,97 +42,51 @@
 
     const totalScore = (rounds, pid) => rounds.reduce((s, r) => s + (r.scores[pid] ?? 0), 0);
 
-    // ── Felt texture overlay ──────────────────────────────────────────────────────
     function FeltBg() {
       return (
-        <div style={{
-          position: "fixed", inset: 0, zIndex: 0,
-          background: "radial-gradient(ellipse at 50% 30%, #1a4731 0%, #0f2d1e 55%, #091a12 100%)",
-          overflow: "hidden",
-        }}>
+        <div style={{ position: "fixed", inset: 0, zIndex: 0, background: "radial-gradient(ellipse at 50% 30%, #1a4731 0%, #0f2d1e 55%, #091a12 100%)", overflow: "hidden" }}>
           <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", opacity: 0.08 }}>
             <filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" /><feColorMatrix type="saturate" values="0" /></filter>
             <rect width="100%" height="100%" filter="url(#noise)" />
           </svg>
           {["♠","♥","♦","♣"].map((s, i) => (
-            <div key={i} style={{
-              position: "absolute",
-              top: i < 2 ? "16px" : "auto", bottom: i >= 2 ? "16px" : "auto",
-              left: i % 2 === 0 ? "20px" : "auto", right: i % 2 === 1 ? "20px" : "auto",
-              fontSize: "48px", color: i % 2 === 1 ? "#b91c1c44" : "#ffffff10",
-              lineHeight: 1, userSelect: "none", pointerEvents: "none",
-            }}>{s}</div>
+            <div key={i} style={{ position: "absolute", top: i < 2 ? "16px" : "auto", bottom: i >= 2 ? "16px" : "auto", left: i % 2 === 0 ? "20px" : "auto", right: i % 2 === 1 ? "20px" : "auto", fontSize: "48px", color: i % 2 === 1 ? "#b91c1c44" : "#ffffff10", lineHeight: 1, userSelect: "none", pointerEvents: "none" }}>{s}</div>
           ))}
         </div>
       );
     }
 
-    // ── Player card ───────────────────────────────────────────────────────────────
     function PlayerCard({ player, colorInfo, rank, total, onNameChange }) {
       const [editing, setEditing] = useState(false);
       const [val, setVal] = useState(player.name);
       const ref = useRef();
       useEffect(() => { if (editing) ref.current?.select(); }, [editing]);
       const commit = () => { onNameChange(val || player.name); setEditing(false); };
-
       const medal = rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : null;
 
       return (
-        <div style={{
-          background: colorInfo.bg, borderRadius: "12px", padding: "14px 12px 12px",
-          position: "relative",
-          boxShadow: rank === 1 ? `0 0 0 3px ${colorInfo.accent}, 0 8px 32px #00000060` : "0 4px 20px #00000050",
-          display: "flex", flexDirection: "column", alignItems: "center", gap: "6px",
-          minWidth: 0, transition: "transform 0.2s",
-        }}>
+        <div style={{ background: colorInfo.bg, borderRadius: "12px", padding: "14px 12px 12px", position: "relative", boxShadow: rank === 1 ? `0 0 0 3px ${colorInfo.accent}, 0 8px 32px #00000060` : "0 4px 20px #00000050", display: "flex", flexDirection: "column", alignItems: "center", gap: "6px", minWidth: 0, transition: "transform 0.2s" }}>
           <div style={{ position: "absolute", top: "5px", left: "7px", fontSize: "13px", color: colorInfo.text, opacity: 0.5, lineHeight: 1 }}>{colorInfo.suit}</div>
           <div style={{ position: "absolute", bottom: "5px", right: "7px", fontSize: "13px", color: colorInfo.text, opacity: 0.5, lineHeight: 1, transform: "rotate(180deg)" }}>{colorInfo.suit}</div>
           {medal && <div style={{ position: "absolute", top: "4px", right: "6px", fontSize: "14px" }}>{medal}</div>}
           <div style={{ fontSize: "28px", lineHeight: 1, color: colorInfo.text, opacity: 0.85 }}>{colorInfo.suit}</div>
 
           {editing ? (
-            <input ref={ref} value={val} onChange={e => setVal(e.target.value)} onBlur={commit}
-              onKeyDown={e => { if (e.key === "Enter") commit(); if (e.key === "Escape") setEditing(false); }}
-              style={{
-                background: "rgba(0,0,0,0.1)", border: `1.5px solid ${colorInfo.accent}`,
-                borderRadius: "5px", color: colorInfo.text, fontSize: "11px",
-                fontFamily: "Tahoma, 'Trebuchet MS', Geneva, sans-serif", fontWeight: 700,
-                textAlign: "center", width: "100%", padding: "2px 4px", outline: "none",
-              }}
-            />
+            <input ref={ref} value={val} onChange={e => setVal(e.target.value)} onBlur={commit} onKeyDown={e => { if (e.key === "Enter") commit(); if (e.key === "Escape") setEditing(false); }} style={{ background: "rgba(0,0,0,0.1)", border: `1.5px solid ${colorInfo.accent}`, borderRadius: "5px", color: colorInfo.text, fontSize: "11px", fontFamily: "Tahoma, 'Trebuchet MS', Geneva, sans-serif", fontWeight: 700, textAlign: "center", width: "100%", padding: "2px 4px", outline: "none" }} />
           ) : (
-            <div onClick={() => { setVal(player.name); setEditing(true); }}
-              style={{
-                fontSize: "11px", fontFamily: "Tahoma, 'Trebuchet MS', Geneva, sans-serif", fontWeight: 700,
-                color: colorInfo.text, cursor: "pointer", textAlign: "center",
-                borderBottom: `1px dashed ${colorInfo.accent}88`,
-                overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-                maxWidth: "100%", lineHeight: 1.4,
-              }}
-            >{player.name}</div>
+            <div onClick={() => { setVal(player.name); setEditing(true); }} style={{ fontSize: "11px", fontFamily: "Tahoma, 'Trebuchet MS', Geneva, sans-serif", fontWeight: 700, color: colorInfo.text, cursor: "pointer", textAlign: "center", borderBottom: `1px dashed ${colorInfo.accent}88`, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%", lineHeight: 1.4 }}>{player.name}</div>
           )}
-
           <div style={{ fontSize: "32px", fontFamily: "Tahoma, 'Trebuchet MS', Geneva, sans-serif", fontWeight: 900, color: colorInfo.text, lineHeight: 1, letterSpacing: "-1px" }}>{total}</div>
           <div style={{ fontSize: "9px", fontFamily: "Tahoma, 'Trebuchet MS', Geneva, sans-serif", color: colorInfo.text, opacity: 0.5, letterSpacing: "0.1em", textTransform: "uppercase" }}>pts</div>
         </div>
       );
     }
 
-    // ── Score evolution chart ─────────────────────────────────────────────────────
     function EvolutionChart({ players, rounds }) {
-      if (rounds.length === 0) return (
-        <div style={{ textAlign: "center", color: "#2d5a3d", fontSize: "13px", fontFamily: "Tahoma, 'Trebuchet MS', Geneva, sans-serif", padding: "20px 0", fontStyle: "italic" }}>
-          Aucune manche — le graphique apparaîtra ici
-        </div>
-      );
-
+      if (rounds.length === 0) return <div style={{ textAlign: "center", color: "#2d5a3d", fontSize: "13px", fontFamily: "Tahoma, 'Trebuchet MS', Geneva, sans-serif", padding: "20px 0", fontStyle: "italic" }}>Aucune manche — le graphique apparaîtra ici</div>;
       const data = rounds.map((_, ri) => {
         const point = { round: `M${ri + 1}` };
-        players.forEach(p => {
-          let acc = 0;
-          for (let j = 0; j <= ri; j++) acc += rounds[j].scores[p.id] ?? 0;
-          point[p.id] = acc;
-        });
+        players.forEach(p => { let acc = 0; for (let j = 0; j <= ri; j++) acc += rounds[j].scores[p.id] ?? 0; point[p.id] = acc; });
         return point;
       });
 
@@ -165,30 +117,17 @@
             <YAxis tick={{ fill: "#2d5a3d", fontSize: 9, fontFamily: "Tahoma, 'Trebuchet MS', Geneva, sans-serif" }} axisLine={false} tickLine={false} />
             <ReferenceLine y={0} stroke="#2d5a3d" strokeDasharray="3 3" />
             <Tooltip content={<CustomTooltip />} />
-            {players.map((p, i) => (
-              <Line key={p.id} type="monotone" dataKey={p.id} stroke={SUIT_COLORS[i % SUIT_COLORS.length].accent} strokeWidth={2} dot={{ fill: SUIT_COLORS[i % SUIT_COLORS.length].accent, r: 3 }} activeDot={{ r: 5 }} />
-            ))}
+            {players.map((p, i) => <Line key={p.id} type="monotone" dataKey={p.id} stroke={SUIT_COLORS[i % SUIT_COLORS.length].accent} strokeWidth={2} dot={{ fill: SUIT_COLORS[i % SUIT_COLORS.length].accent, r: 3 }} activeDot={{ r: 5 }} />)}
           </LineChart>
         </ResponsiveContainer>
       );
     }
 
-    // ── Round input ───────────────────────────────────────────────────────────────
-    function RoundInput({ players, roundNumber, onValidate }) {
+    // --- MODE CLASSIQUE ---
+    function RoundInputClassic({ players, roundNumber, onValidate }) {
       const [inputs, setInputs] = useState(() => Object.fromEntries(players.map(p => [p.id, ""])));
       const refs = useRef({});
-      useEffect(() => { setInputs(Object.fromEntries(players.map(p => [p.id, ""]))); }, [players.length]);
-
       const set = (id, v) => { if (v === "" || v === "-" || /^-?\d*$/.test(v)) setInputs(p => ({ ...p, [id]: v })); };
-
-      const handleKey = (e, idx) => {
-        if (e.key === "Enter" || e.key === "Tab") {
-          e.preventDefault();
-          const next = players[idx + 1];
-          if (next) refs.current[next.id]?.focus(); else validate();
-        }
-      };
-
       const validate = () => {
         const scores = {};
         players.forEach(p => { scores[p.id] = parseInt(inputs[p.id], 10) || 0; });
@@ -196,43 +135,140 @@
         setInputs(Object.fromEntries(players.map(p => [p.id, ""])));
         refs.current[players[0].id]?.focus();
       };
-
       const allEmpty = players.every(p => inputs[p.id] === "");
 
       return (
         <div style={{ background: "rgba(0,0,0,0.35)", border: "1px solid #2d5a3d", borderRadius: "14px", overflow: "hidden", boxShadow: "inset 0 1px 0 #4ade8020" }}>
           <div style={{ background: "rgba(0,0,0,0.3)", borderBottom: "1px solid #2d5a3d", padding: "10px 16px", display: "flex", alignItems: "center", gap: "10px" }}>
-            <span style={{ fontSize: "18px" }}>🃏</span>
-            <span style={{ fontFamily: "Tahoma, 'Trebuchet MS', Geneva, sans-serif", fontWeight: 700, color: "#4ade80", fontSize: "14px", letterSpacing: "0.04em" }}>Manche {roundNumber}</span>
+            <span style={{ fontSize: "18px" }}>🃏</span><span style={{ fontFamily: "Tahoma", fontWeight: 700, color: "#4ade80", fontSize: "14px" }}>Manche {roundNumber} (Classique)</span>
           </div>
-
           <div style={{ padding: "14px 16px", display: "flex", flexDirection: "column", gap: "10px" }}>
             {players.map((p, i) => {
               const ci = SUIT_COLORS[i % SUIT_COLORS.length];
               return (
                 <div key={p.id} style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                  <div style={{ width: "22px", fontSize: "16px", textAlign: "center", color: ci.accent, flexShrink: 0 }}>{ci.suit}</div>
-                  <div style={{ flex: 1, fontFamily: "Tahoma, 'Trebuchet MS', Geneva, sans-serif", fontWeight: 700, fontSize: "13px", color: "#a7f3d0", textTransform: "uppercase", letterSpacing: "0.04em", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.name}</div>
-                  <input ref={el => refs.current[p.id] = el} type="text" inputMode="numeric" placeholder="0" value={inputs[p.id]} onChange={e => set(p.id, e.target.value)} onKeyDown={e => handleKey(e, i)}
-                    style={{ width: "80px", background: `${ci.accent}18`, border: `1.5px solid ${ci.accent}55`, borderRadius: "8px", color: ci.accent, fontFamily: "Tahoma, 'Trebuchet MS', Geneva, sans-serif", fontWeight: 700, fontSize: "16px", textAlign: "center", padding: "6px 8px", outline: "none", flexShrink: 0 }}
-                    onFocus={e => e.target.style.borderColor = ci.accent} onBlur={e => e.target.style.borderColor = `${ci.accent}55`} />
+                  <div style={{ flex: 1, fontFamily: "Tahoma", fontWeight: 700, fontSize: "13px", color: ci.accent }}>{p.name}</div>
+                  <input ref={el => refs.current[p.id] = el} type="text" placeholder="0" value={inputs[p.id]} onChange={e => set(p.id, e.target.value)}
+                    onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); const next = players[i + 1]; if (next) refs.current[next.id]?.focus(); else validate(); } }}
+                    style={{ width: "80px", background: `${ci.accent}18`, border: `1px solid ${ci.accent}55`, borderRadius: "8px", color: ci.accent, fontFamily: "Tahoma", fontWeight: 700, fontSize: "16px", textAlign: "center", padding: "6px" }} />
                 </div>
               );
             })}
           </div>
-
           <div style={{ padding: "12px 16px", borderTop: "1px solid #2d5a3d22", display: "flex", justifyContent: "flex-end" }}>
-            <button onClick={validate} disabled={allEmpty} style={{ padding: "10px 28px", borderRadius: "8px", background: allEmpty ? "#1a3326" : "linear-gradient(135deg, #4ade80, #22c55e)", border: allEmpty ? "1px solid #2d5a3d" : "none", color: allEmpty ? "#2d5a3d" : "#052e16", fontFamily: "Tahoma, 'Trebuchet MS', Geneva, sans-serif", fontWeight: 700, fontSize: "13px", cursor: allEmpty ? "default" : "pointer", letterSpacing: "0.06em", boxShadow: allEmpty ? "none" : "0 4px 16px #4ade8044", transition: "all 0.2s" }}>✦ VALIDER</button>
+            <button onClick={validate} disabled={allEmpty} style={{ padding: "10px 28px", borderRadius: "8px", background: allEmpty ? "#1a3326" : "#4ade80", border: "none", color: allEmpty ? "#2d5a3d" : "#052e16", fontFamily: "Tahoma", fontWeight: 700, cursor: allEmpty ? "default" : "pointer" }}>✦ VALIDER</button>
           </div>
         </div>
       );
     }
 
-    // ── History table ─────────────────────────────────────────────────────────────
+    // --- MODE TAROT ---
+    function RoundInputTarot({ players, roundNumber, onValidate }) {
+      const [preneur, setPreneur] = useState(players[0].id);
+      const [partenaire, setPartenaire] = useState(players[0].id);
+      const [contrat, setContrat] = useState(1); // 1:Petite, 2:Garde, 4:G-Sans, 6:G-Contre
+      const [bouts, setBouts] = useState(0);
+      const [points, setPoints] = useState("");
+
+      const calculate = () => {
+        const pts = parseInt(points, 10);
+        if (isNaN(pts)) return;
+
+        let target = 56;
+        if (bouts === 1) target = 51;
+        if (bouts === 2) target = 41;
+        if (bouts === 3) target = 36;
+
+        const diff = pts - target;
+        const passed = diff >= 0;
+        const baseScore = (Math.abs(diff) + 25) * contrat;
+        const finalScore = passed ? baseScore : -baseScore;
+
+        const scores = {};
+        players.forEach(p => scores[p.id] = 0);
+
+        if (players.length === 3) {
+          players.forEach(p => { scores[p.id] = p.id === preneur ? finalScore * 2 : -finalScore; });
+        } else if (players.length === 4) {
+          players.forEach(p => { scores[p.id] = p.id === preneur ? finalScore * 3 : -finalScore; });
+        } else if (players.length === 5) {
+          players.forEach(p => {
+            if (p.id === preneur && p.id === partenaire) scores[p.id] = finalScore * 4;
+            else if (p.id === preneur) scores[p.id] = finalScore * 2;
+            else if (p.id === partenaire) scores[p.id] = finalScore;
+            else scores[p.id] = -finalScore;
+          });
+        }
+        
+        onValidate(scores);
+        setPoints("");
+      };
+
+      const btnStyle = (active) => ({ padding: "6px 10px", borderRadius: "6px", fontFamily: "Tahoma", fontSize: "12px", fontWeight: 700, cursor: "pointer", border: active ? "1px solid #4ade80" : "1px solid #2d5a3d", background: active ? "#4ade8022" : "transparent", color: active ? "#4ade80" : "#2d5a3d" });
+
+      return (
+        <div style={{ background: "rgba(0,0,0,0.35)", border: "1px solid #2d5a3d", borderRadius: "14px", overflow: "hidden" }}>
+          <div style={{ background: "rgba(0,0,0,0.3)", borderBottom: "1px solid #2d5a3d", padding: "10px 16px", display: "flex", alignItems: "center", gap: "10px" }}>
+            <span style={{ fontSize: "18px" }}>🎴</span><span style={{ fontFamily: "Tahoma", fontWeight: 700, color: "#4ade80", fontSize: "14px" }}>Manche {roundNumber} (Calcul Tarot)</span>
+          </div>
+          
+          <div style={{ padding: "16px", display: "flex", flexDirection: "column", gap: "16px" }}>
+            {/* Rôles */}
+            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+              <div style={{ flex: 1, minWidth: "140px" }}>
+                <div style={{ fontSize: "10px", color: "#4ade8066", textTransform: "uppercase", marginBottom: "4px", fontFamily: "Tahoma" }}>Preneur</div>
+                <select value={preneur} onChange={e => setPreneur(parseInt(e.target.value))} style={{ width: "100%", padding: "8px", borderRadius: "6px", background: "#0f2d1e", color: "#a7f3d0", border: "1px solid #2d5a3d", fontFamily: "Tahoma" }}>
+                  {players.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                </select>
+              </div>
+              {players.length === 5 && (
+                <div style={{ flex: 1, minWidth: "140px" }}>
+                  <div style={{ fontSize: "10px", color: "#4ade8066", textTransform: "uppercase", marginBottom: "4px", fontFamily: "Tahoma" }}>Partenaire (Appelé)</div>
+                  <select value={partenaire} onChange={e => setPartenaire(parseInt(e.target.value))} style={{ width: "100%", padding: "8px", borderRadius: "6px", background: "#0f2d1e", color: "#a7f3d0", border: "1px solid #2d5a3d", fontFamily: "Tahoma" }}>
+                    {players.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                  </select>
+                </div>
+              )}
+            </div>
+
+            {/* Contrat & Bouts */}
+            <div>
+              <div style={{ fontSize: "10px", color: "#4ade8066", textTransform: "uppercase", marginBottom: "6px", fontFamily: "Tahoma" }}>Contrat</div>
+              <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
+                <button onClick={() => setContrat(1)} style={btnStyle(contrat === 1)}>Petite</button>
+                <button onClick={() => setContrat(2)} style={btnStyle(contrat === 2)}>Garde</button>
+                <button onClick={() => setContrat(4)} style={btnStyle(contrat === 4)}>G-Sans</button>
+                <button onClick={() => setContrat(6)} style={btnStyle(contrat === 6)}>G-Contre</button>
+              </div>
+            </div>
+
+            <div>
+              <div style={{ fontSize: "10px", color: "#4ade8066", textTransform: "uppercase", marginBottom: "6px", fontFamily: "Tahoma" }}>Nombre de bouts (Oudlers)</div>
+              <div style={{ display: "flex", gap: "6px" }}>
+                {[0, 1, 2, 3].map(b => (
+                  <button key={b} onClick={() => setBouts(b)} style={btnStyle(bouts === b)}>{b}</button>
+                ))}
+              </div>
+            </div>
+
+            {/* Points */}
+            <div>
+              <div style={{ fontSize: "10px", color: "#4ade8066", textTransform: "uppercase", marginBottom: "6px", fontFamily: "Tahoma" }}>Points réalisés par l'attaque (0 - 91)</div>
+              <input type="number" value={points} onChange={e => setPoints(e.target.value)} placeholder="Ex: 42" onKeyDown={e => { if (e.key === "Enter") calculate(); }}
+                style={{ width: "100px", background: "#1a473144", border: "1.5px solid #4ade8088", borderRadius: "8px", color: "#4ade80", fontFamily: "Tahoma", fontWeight: 700, fontSize: "16px", textAlign: "center", padding: "8px", outline: "none" }} />
+            </div>
+          </div>
+
+          <div style={{ padding: "12px 16px", borderTop: "1px solid #2d5a3d22", display: "flex", justifyContent: "flex-end" }}>
+            <button onClick={calculate} disabled={points === ""} style={{ padding: "10px 28px", borderRadius: "8px", background: points === "" ? "#1a3326" : "#4ade80", border: "none", color: points === "" ? "#2d5a3d" : "#052e16", fontFamily: "Tahoma", fontWeight: 700, cursor: points === "" ? "default" : "pointer" }}>✦ CALCULER & VALIDER</button>
+          </div>
+        </div>
+      );
+    }
+
     function HistoryTable({ rounds, players, onDelete }) {
       const [confirmDel, setConfirmDel] = useState(null);
-      if (rounds.length === 0) return <div style={{ textAlign: "center", color: "#2d5a3d", fontStyle: "italic", fontFamily: "Tahoma, 'Trebuchet MS', Geneva, sans-serif", padding: "20px 0" }}>Aucune manche enregistrée</div>;
-      
+      if (rounds.length === 0) return <div style={{ textAlign: "center", color: "#2d5a3d", fontStyle: "italic", fontFamily: "Tahoma", padding: "20px 0" }}>Aucune manche</div>;
       const totals = players.map(p => totalScore(rounds, p.id));
       const maxTotal = Math.max(...totals);
 
@@ -241,9 +277,9 @@
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px", minWidth: `${players.length * 72 + 80}px` }}>
             <thead>
               <tr>
-                <th style={{ ...thS, color: "#2d5a3d", width: "46px" }}>#</th>
-                {players.map((p, i) => <th key={p.id} style={{ ...thS, color: SUIT_COLORS[i % SUIT_COLORS.length].accent }}>{SUIT_COLORS[i % SUIT_COLORS.length].suit} {p.name}</th>)}
-                <th style={{ ...thS, width: "28px" }} />
+                <th style={{ padding: "7px 8px", color: "#2d5a3d", borderBottom: "1px solid #2d5a3d" }}>#</th>
+                {players.map((p, i) => <th key={p.id} style={{ padding: "7px 8px", color: SUIT_COLORS[i % SUIT_COLORS.length].accent, borderBottom: "1px solid #2d5a3d", fontFamily: "Tahoma" }}>{p.name}</th>)}
+                <th style={{ borderBottom: "1px solid #2d5a3d" }} />
               </tr>
             </thead>
             <tbody>
@@ -251,26 +287,24 @@
                 const rowMax = Math.max(...players.map(p => r.scores[p.id] ?? 0));
                 return (
                   <tr key={r.id} style={{ borderBottom: "1px solid #1a3326" }}>
-                    <td style={{ ...tdS, color: "#2d5a3d", fontFamily: "Tahoma, 'Trebuchet MS', Geneva, sans-serif" }}>M{ri + 1}</td>
+                    <td style={{ padding: "7px 8px", textAlign: "center", color: "#2d5a3d", fontFamily: "Tahoma" }}>M{ri + 1}</td>
                     {players.map((p, i) => {
                       const v = r.scores[p.id] ?? 0;
                       const best = v === rowMax && rowMax > 0;
-                      return <td key={p.id} style={{ ...tdS, fontFamily: "Tahoma, 'Trebuchet MS', Geneva, sans-serif", color: best ? SUIT_COLORS[i % SUIT_COLORS.length].accent : "#3d7a52", fontWeight: best ? 700 : 400 }}>{v > 0 ? `+${v}` : v}</td>;
+                      return <td key={p.id} style={{ padding: "7px 8px", textAlign: "center", fontFamily: "Tahoma", color: best ? SUIT_COLORS[i % SUIT_COLORS.length].accent : "#3d7a52", fontWeight: best ? 700 : 400 }}>{v > 0 ? `+${v}` : v}</td>;
                     })}
-                    <td style={{ ...tdS, padding: "3px" }}>
-                      {confirmDel === r.id
-                        ? <button onClick={() => { onDelete(r.id); setConfirmDel(null); }} style={{ background: "#7f1d1d", border: "none", borderRadius: "4px", color: "#fca5a5", fontSize: "9px", padding: "2px 6px", cursor: "pointer" }}>✕</button>
-                        : <button onClick={() => setConfirmDel(r.id)} style={{ background: "transparent", border: "none", color: "#1a3326", fontSize: "16px", cursor: "pointer", lineHeight: 1 }}>×</button>}
+                    <td style={{ padding: "3px", textAlign: "center" }}>
+                      {confirmDel === r.id ? <button onClick={() => { onDelete(r.id); setConfirmDel(null); }} style={{ background: "#7f1d1d", border: "none", borderRadius: "4px", color: "#fff", padding: "2px 6px" }}>✕</button> : <button onClick={() => setConfirmDel(r.id)} style={{ background: "transparent", border: "none", color: "#2d5a3d", fontSize: "16px", cursor: "pointer" }}>×</button>}
                     </td>
                   </tr>
                 );
               })}
               <tr style={{ borderTop: "2px solid #2d5a3d" }}>
-                <td style={{ ...tdS, color: "#4ade80", fontFamily: "Tahoma, 'Trebuchet MS', Geneva, sans-serif", fontWeight: 700, fontSize: "10px", letterSpacing: "0.08em" }}>TOTAL</td>
+                <td style={{ padding: "7px 8px", textAlign: "center", color: "#4ade80", fontFamily: "Tahoma", fontWeight: 700 }}>TOT</td>
                 {players.map((p, i) => {
                   const t = totals[i];
                   const win = t === maxTotal && maxTotal > 0;
-                  return <td key={p.id} style={{ ...tdS, fontFamily: "Tahoma, 'Trebuchet MS', Geneva, sans-serif", fontWeight: 700, fontSize: "15px", color: win ? SUIT_COLORS[i % SUIT_COLORS.length].accent : "#4ade8088" }}>{win ? "🏆 " : ""}{t}</td>;
+                  return <td key={p.id} style={{ padding: "7px 8px", textAlign: "center", fontFamily: "Tahoma", fontWeight: 700, fontSize: "15px", color: win ? SUIT_COLORS[i % SUIT_COLORS.length].accent : "#4ade8088" }}>{win ? "🏆 " : ""}{t}</td>;
                 })}
                 <td />
               </tr>
@@ -280,65 +314,75 @@
       );
     }
 
-    const thS = { padding: "7px 8px", textAlign: "center", fontFamily: "Tahoma, 'Trebuchet MS', Geneva, sans-serif", fontWeight: 700, fontSize: "10px", letterSpacing: "0.08em", textTransform: "uppercase", borderBottom: "1px solid #2d5a3d" };
-    const tdS = { padding: "7px 8px", textAlign: "center" };
-
-    // ── Setup screen ──────────────────────────────────────────────────────────────
     function SetupScreen({ onStart }) {
+      const [mode, setMode] = useState("classique"); // "classique" or "tarot"
       const [count, setCount] = useState(4);
       const [names, setNames] = useState(Array.from({ length: 10 }, (_, i) => `Joueur ${i + 1}`));
       const setName = (i, v) => setNames(prev => prev.map((n, j) => j === i ? v : n));
 
+      // Adapter le nombre de joueurs si on passe au Tarot
+      useEffect(() => {
+        if (mode === "tarot" && (count < 3 || count > 5)) setCount(4);
+      }, [mode]);
+
+      const availableCounts = mode === "tarot" ? [3, 4, 5] : [2, 3, 4, 5, 6, 7, 8, 9, 10];
+
       return (
         <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "32px 16px", position: "relative", zIndex: 1 }}>
-          <div style={{ display: "flex", gap: "12px", marginBottom: "20px", fontSize: "28px" }}>
-            {["♠","♥","♦","♣"].map((s, i) => <span key={i} style={{ color: i % 2 === 1 ? "#ef4444" : "#e2e8f0", opacity: 0.9 }}>{s}</span>)}
+          <h1 style={{ fontFamily: "Tahoma", fontWeight: 900, fontSize: "clamp(30px, 7vw, 48px)", color: "#f0fdf4", letterSpacing: "0.04em", marginBottom: "32px", textShadow: "0 0 40px #4ade8044" }}>SCOREBOARD</h1>
+
+          {/* SÉLECTION DU MODE */}
+          <div style={{ marginBottom: "24px", textAlign: "center" }}>
+            <div style={{ fontSize: "10px", color: "#2d5a3d", textTransform: "uppercase", marginBottom: "12px", fontFamily: "Tahoma" }}>Mode de jeu</div>
+            <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
+              <button onClick={() => setMode("classique")} style={{ padding: "10px 20px", borderRadius: "8px", fontFamily: "Tahoma", fontWeight: 700, border: mode === "classique" ? "2px solid #4ade80" : "2px solid #1a3326", background: mode === "classique" ? "#4ade8022" : "transparent", color: mode === "classique" ? "#4ade80" : "#2d5a3d", cursor: "pointer" }}>Classique</button>
+              <button onClick={() => setMode("tarot")} style={{ padding: "10px 20px", borderRadius: "8px", fontFamily: "Tahoma", fontWeight: 700, border: mode === "tarot" ? "2px solid #f59e0b" : "2px solid #1a3326", background: mode === "tarot" ? "#f59e0b22" : "transparent", color: mode === "tarot" ? "#f59e0b" : "#2d5a3d", cursor: "pointer" }}>🎴 Tarot (Auto)</button>
+            </div>
           </div>
-          <div style={{ fontSize: "10px", letterSpacing: "0.35em", color: "#4ade8066", textTransform: "uppercase", marginBottom: "6px", fontFamily: "Tahoma, 'Trebuchet MS', Geneva, sans-serif" }}>Nouvelle partie</div>
-          <h1 style={{ fontFamily: "Tahoma, 'Trebuchet MS', Geneva, sans-serif", fontWeight: 900, fontSize: "clamp(30px, 7vw, 48px)", color: "#f0fdf4", letterSpacing: "0.04em", marginBottom: "8px", textShadow: "0 0 40px #4ade8044" }}>SCOREBOARD</h1>
-          <div style={{ fontSize: "11px", color: "#2d5a3d", fontFamily: "Tahoma, 'Trebuchet MS', Geneva, sans-serif", fontStyle: "italic", marginBottom: "32px" }}>Jeux de cartes · Compteur de points</div>
 
           <div style={{ marginBottom: "24px", textAlign: "center" }}>
-            <div style={{ fontSize: "10px", letterSpacing: "0.2em", color: "#2d5a3d", textTransform: "uppercase", marginBottom: "12px", fontFamily: "Tahoma, 'Trebuchet MS', Geneva, sans-serif" }}>Nombre de joueurs</div>
+            <div style={{ fontSize: "10px", color: "#2d5a3d", textTransform: "uppercase", marginBottom: "12px", fontFamily: "Tahoma" }}>Nombre de joueurs</div>
             <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", justifyContent: "center" }}>
-              {[2,3,4,5,6,7,8,9,10].map(n => {
+              {availableCounts.map(n => {
                 const ci = SUIT_COLORS[(n - 2) % SUIT_COLORS.length];
-                return <button key={n} onClick={() => setCount(n)} style={{ width: "42px", height: "42px", borderRadius: "8px", border: count === n ? `2px solid ${ci.accent}` : "2px solid #1a3326", background: count === n ? `${ci.accent}22` : "#0f2d1e", color: count === n ? ci.accent : "#2d5a3d", fontFamily: "Tahoma, 'Trebuchet MS', Geneva, sans-serif", fontWeight: 700, fontSize: "16px", cursor: "pointer", transition: "all 0.15s" }}>{n}</button>;
+                return <button key={n} onClick={() => setCount(n)} style={{ width: "42px", height: "42px", borderRadius: "8px", border: count === n ? `2px solid ${ci.accent}` : "2px solid #1a3326", background: count === n ? `${ci.accent}22` : "#0f2d1e", color: count === n ? ci.accent : "#2d5a3d", fontFamily: "Tahoma", fontWeight: 700, fontSize: "16px", cursor: "pointer" }}>{n}</button>;
               })}
             </div>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: count <= 4 ? "1fr 1fr" : count <= 6 ? "1fr 1fr 1fr" : "1fr 1fr 1fr 1fr", gap: "10px", width: "100%", maxWidth: "540px", marginBottom: "28px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: count <= 4 ? "1fr 1fr" : "1fr 1fr 1fr", gap: "10px", width: "100%", maxWidth: "540px", marginBottom: "28px" }}>
             {Array.from({ length: count }, (_, i) => {
               const ci = SUIT_COLORS[i % SUIT_COLORS.length];
               return (
                 <div key={i} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                   <span style={{ fontSize: "16px", color: ci.accent, flexShrink: 0 }}>{ci.suit}</span>
-                  <input value={names[i]} onChange={e => setName(i, e.target.value)} placeholder={`Joueur ${i + 1}`}
-                    style={{ background: `${ci.accent}12`, border: `1.5px solid ${ci.accent}44`, borderRadius: "8px", color: "#a7f3d0", fontFamily: "Tahoma, 'Trebuchet MS', Geneva, sans-serif", fontWeight: 700, fontSize: "12px", padding: "7px 10px", outline: "none", width: "100%" }}
-                    onFocus={e => e.target.style.borderColor = ci.accent} onBlur={e => e.target.style.borderColor = `${ci.accent}44`} />
+                  <input value={names[i]} onChange={e => setName(i, e.target.value)} placeholder={`Joueur ${i + 1}`} style={{ background: `${ci.accent}12`, border: `1.5px solid ${ci.accent}44`, borderRadius: "8px", color: "#a7f3d0", fontFamily: "Tahoma", fontWeight: 700, fontSize: "12px", padding: "7px 10px", outline: "none", width: "100%" }} />
                 </div>
               );
             })}
           </div>
 
-          <button onClick={() => onStart(count, names.slice(0, count))} style={{ padding: "14px 48px", borderRadius: "10px", background: "linear-gradient(135deg, #4ade80, #22c55e)", border: "none", color: "#052e16", fontFamily: "Tahoma, 'Trebuchet MS', Geneva, sans-serif", fontWeight: 900, fontSize: "16px", cursor: "pointer", letterSpacing: "0.08em", boxShadow: "0 6px 24px #4ade8055" }}>✦ COMMENCER LA PARTIE</button>
+          <button onClick={() => onStart(count, names.slice(0, count), mode)} style={{ padding: "14px 48px", borderRadius: "10px", background: "linear-gradient(135deg, #4ade80, #22c55e)", border: "none", color: "#052e16", fontFamily: "Tahoma", fontWeight: 900, fontSize: "16px", cursor: "pointer" }}>✦ COMMENCER</button>
         </div>
       );
     }
 
-    // ── Main App ──────────────────────────────────────────────────────────────────
     function App() {
       const [gameStarted, setGameStarted] = useState(false);
+      const [gameMode, setGameMode] = useState("classique");
       const [players, setPlayers] = useState([]);
       const [rounds, setRounds] = useState([]);
       const [tab, setTab] = useState("saisie");
       const [confirmReset, setConfirmReset] = useState(false);
       const nextId = useRef(0);
 
-      const startGame = (count, names) => { setPlayers(names.map((name, i) => ({ name, id: i }))); nextId.current = 0; setRounds([]); setTab("saisie"); setGameStarted(true); };
+      const startGame = (count, names, mode) => { 
+        setPlayers(names.map((name, i) => ({ name, id: i }))); 
+        setGameMode(mode);
+        nextId.current = 0; setRounds([]); setTab("saisie"); setGameStarted(true); 
+      };
       const updateName = (id, name) => setPlayers(prev => prev.map(p => p.id === id ? { ...p, name } : p));
-      const addRound = scores => { setRounds(prev => [...prev, { id: nextId.current++, scores }]); setTab("graph"); };
+      const addRound = scores => { setRounds(prev => [...prev, { id: nextId.current++, scores }]); setTab("historique"); };
       const deleteRound = id => setRounds(prev => prev.filter(r => r.id !== id));
       const reset = () => { setRounds([]); setPlayers([]); setGameStarted(false); setConfirmReset(false); };
 
@@ -349,64 +393,67 @@
         <>
           <FeltBg />
           {!gameStarted ? <SetupScreen onStart={startGame} /> : (
-            <div style={{ position: "relative", zIndex: 1, maxWidth: "900px", margin: "0 auto", padding: "20px 16px 60px" }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px" }}>
-                <button onClick={() => setConfirmReset(true)} style={{ background: "transparent", border: "1px solid #1a3326", borderRadius: "7px", color: "#2d5a3d", cursor: "pointer", fontSize: "11px", fontFamily: "Tahoma, 'Trebuchet MS', Geneva, sans-serif", fontWeight: 700, padding: "6px 12px", letterSpacing: "0.05em" }}>← Retour</button>
-                <div style={{ textAlign: "center" }}>
-                  <div style={{ fontSize: "9px", letterSpacing: "0.3em", color: "#2d5a3d", fontFamily: "Tahoma, 'Trebuchet MS', Geneva, sans-serif", textTransform: "uppercase" }}>{players.length} joueurs · {rounds.length} manche{rounds.length !== 1 ? "s" : ""}</div>
-                  <h1 style={{ fontFamily: "Tahoma, 'Trebuchet MS', Geneva, sans-serif", fontWeight: 900, fontSize: "clamp(18px, 4vw, 28px)", color: "#f0fdf4", letterSpacing: "0.06em", textShadow: "0 0 20px #4ade8033" }}>♠ SCOREBOARD ♦</h1>
-                </div>
-                <div style={{ width: "72px" }} />
+            <div style={{ position: "relative", zIndex: 1, maxWidth: "900px", margin: "0 auto", padding: "16px", display: "flex", flexDirection: "column", gap: "24px" }}>
+            
+            {/* --- EN-TÊTE ET NAVIGATION --- */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "#0f2d1e", padding: "12px 20px", borderRadius: "12px", border: "1px solid #2d5a3d" }}>
+              <div style={{ display: "flex", gap: "10px" }}>
+                <button onClick={() => setTab("saisie")} style={{ padding: "8px 16px", borderRadius: "8px", background: tab === "saisie" ? "#4ade80" : "transparent", color: tab === "saisie" ? "#052e16" : "#4ade80", border: tab === "saisie" ? "none" : "1px solid #2d5a3d", fontFamily: "Tahoma", fontWeight: 700, cursor: "pointer" }}>Saisie</button>
+                <button onClick={() => setTab("historique")} style={{ padding: "8px 16px", borderRadius: "8px", background: tab === "historique" ? "#4ade80" : "transparent", color: tab === "historique" ? "#052e16" : "#4ade80", border: tab === "historique" ? "none" : "1px solid #2d5a3d", fontFamily: "Tahoma", fontWeight: 700, cursor: "pointer" }}>Historique</button>
               </div>
-
-              <div style={{ display: "grid", gridTemplateColumns: `repeat(${Math.min(players.length, 5)}, 1fr)`, gap: "10px", marginBottom: "18px" }}>
-                {players.map((p, i) => <PlayerCard key={p.id} player={p} colorInfo={SUIT_COLORS[i % SUIT_COLORS.length]} rank={getRank(p.id)} total={totalScore(rounds, p.id)} onNameChange={name => updateName(p.id, name)} />)}
-              </div>
-
-              <div style={{ display: "flex", gap: "6px", marginBottom: "14px", borderBottom: "1px solid #1a3326", paddingBottom: "12px" }}>
-                {[["saisie", "🃏 Saisir"], ["graph", "📈 Évolution"], ["historique", `📋 Historique (${rounds.length})`]].map(([key, label]) => (
-                  <button key={key} onClick={() => setTab(key)} style={{ padding: "7px 14px", borderRadius: "8px", cursor: "pointer", fontFamily: "Tahoma, 'Trebuchet MS', Geneva, sans-serif", fontWeight: 700, fontSize: "12px", border: tab === key ? "1.5px solid #4ade8055" : "1.5px solid transparent", background: tab === key ? "#4ade8018" : "transparent", color: tab === key ? "#4ade80" : "#2d5a3d", transition: "all 0.15s" }}>{label}</button>
-                ))}
-              </div>
-
-              {tab === "saisie" && <RoundInput players={players} roundNumber={rounds.length + 1} onValidate={addRound} />}
-              
-              {tab === "graph" && (
-                <div style={{ background: "rgba(0,0,0,0.35)", border: "1px solid #2d5a3d", borderRadius: "14px", padding: "16px" }}>
-                  <div style={{ fontSize: "11px", color: "#4ade8066", fontFamily: "Tahoma, 'Trebuchet MS', Geneva, sans-serif", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "12px" }}>Évolution des scores par manche</div>
-                  <EvolutionChart players={players} rounds={rounds} />
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", marginTop: "12px" }}>
-                    {players.map((p, i) => {
-                      const ci = SUIT_COLORS[i % SUIT_COLORS.length];
-                      return <div key={p.id} style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "11px", fontFamily: "Tahoma, 'Trebuchet MS', Geneva, sans-serif", color: "#a7f3d0" }}><div style={{ width: "20px", height: "2px", background: ci.accent, borderRadius: "2px" }} /><span style={{ color: ci.accent }}>{ci.suit}</span>{p.name}</div>;
-                    })}
-                  </div>
-                </div>
-              )}
-
-              {tab === "historique" && <div style={{ background: "rgba(0,0,0,0.35)", border: "1px solid #2d5a3d", borderRadius: "14px", padding: "16px" }}><HistoryTable rounds={rounds} players={players} onDelete={deleteRound} /></div>}
-
-              {confirmReset && (
-                <div style={{ position: "fixed", inset: 0, background: "#000000dd", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 200 }}>
-                  <div style={{ background: "#0f2d1e", border: "1px solid #2d5a3d", borderRadius: "16px", padding: "28px 32px", textAlign: "center", fontFamily: "Tahoma, 'Trebuchet MS', Geneva, sans-serif", maxWidth: "300px", width: "90%" }}>
-                    <div style={{ fontSize: "28px", marginBottom: "10px" }}>🃏</div>
-                    <div style={{ fontSize: "16px", fontWeight: 700, color: "#f0fdf4", marginBottom: "6px" }}>Nouvelle partie ?</div>
-                    <div style={{ fontSize: "12px", color: "#2d5a3d", marginBottom: "22px", fontStyle: "italic" }}>Les scores seront perdus.</div>
-                    <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
-                      <button onClick={reset} style={{ padding: "9px 18px", borderRadius: "8px", background: "#7f1d1d", border: "none", color: "#fca5a5", fontFamily: "Tahoma, 'Trebuchet MS', Geneva, sans-serif", fontWeight: 700, fontSize: "13px", cursor: "pointer" }}>Recommencer</button>
-                      <button onClick={() => setConfirmReset(false)} style={{ padding: "9px 18px", borderRadius: "8px", background: "#1a3326", border: "1px solid #2d5a3d", color: "#4ade80", fontFamily: "Tahoma, 'Trebuchet MS', Geneva, sans-serif", fontWeight: 700, fontSize: "13px", cursor: "pointer" }}>Annuler</button>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              <div style={{ textAlign: "center", marginTop: "16px", fontSize: "10px", color: "#1a3326", fontFamily: "Tahoma, 'Trebuchet MS', Geneva, sans-serif", fontStyle: "italic" }}>Cliquer sur un nom pour le modifier · Tab / Entrée pour naviguer</div>
+              <button onClick={() => setConfirmReset(true)} style={{ padding: "8px 16px", borderRadius: "8px", background: "#7f1d1d", color: "#fca5a5", border: "none", fontFamily: "Tahoma", fontWeight: 700, cursor: "pointer" }}>Quitter</button>
             </div>
+
+            {/* --- CONFIRMATION DE SORTIE --- */}
+            {confirmReset && (
+              <div style={{ background: "#7f1d1d22", border: "1px solid #ef4444", borderRadius: "12px", padding: "16px", textAlign: "center" }}>
+                <div style={{ color: "#fca5a5", fontFamily: "Tahoma", fontWeight: 700, marginBottom: "12px" }}>Voulez-vous vraiment quitter ? La partie en cours sera perdue.</div>
+                <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
+                  <button onClick={reset} style={{ padding: "8px 16px", borderRadius: "6px", background: "#ef4444", color: "#fff", border: "none", fontWeight: 700, cursor: "pointer" }}>Oui, quitter</button>
+                  <button onClick={() => setConfirmReset(false)} style={{ padding: "8px 16px", borderRadius: "6px", background: "transparent", border: "1px solid #fca5a5", color: "#fca5a5", fontWeight: 700, cursor: "pointer" }}>Annuler</button>
+                </div>
+              </div>
+            )}
+
+            {/* --- CARTES DES JOUEURS --- */}
+            <div style={{ display: "grid", gridTemplateColumns: `repeat(auto-fit, minmax(120px, 1fr))`, gap: "12px" }}>
+              {players.map((p, i) => (
+                <PlayerCard 
+                  key={p.id} 
+                  player={p} 
+                  colorInfo={SUIT_COLORS[i % SUIT_COLORS.length]} 
+                  rank={getRank(p.id)} 
+                  total={totalScore(rounds, p.id)} 
+                  onNameChange={(newName) => updateName(p.id, newName)} 
+                />
+              ))}
+            </div>
+
+            {/* --- CONTENU PRINCIPAL (ONGLETS) --- */}
+            {tab === "saisie" ? (
+              gameMode === "classique" 
+                ? <RoundInputClassic players={players} roundNumber={rounds.length + 1} onValidate={addRound} />
+                : <RoundInputTarot players={players} roundNumber={rounds.length + 1} onValidate={addRound} />
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+                <div style={{ background: "rgba(0,0,0,0.35)", border: "1px solid #2d5a3d", borderRadius: "14px", padding: "16px" }}>
+                  <div style={{ fontFamily: "Tahoma", fontWeight: 700, color: "#4ade80", fontSize: "14px", marginBottom: "16px" }}>Évolution des scores</div>
+                  <EvolutionChart players={players} rounds={rounds} />
+                </div>
+                <div style={{ background: "rgba(0,0,0,0.35)", border: "1px solid #2d5a3d", borderRadius: "14px", padding: "16px" }}>
+                  <div style={{ fontFamily: "Tahoma", fontWeight: 700, color: "#4ade80", fontSize: "14px", marginBottom: "16px" }}>Tableau des manches</div>
+                  <HistoryTable rounds={rounds} players={players} onDelete={deleteRound} />
+                </div>
+              </div>
+            )}
+
+          </div>
           )}
         </>
       );
     }
 
+    // --- INITIALISATION REACT ---
     const root = ReactDOM.createRoot(document.getElementById('root'));
     root.render(<App />);
   </script>
