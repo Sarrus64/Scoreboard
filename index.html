@@ -320,9 +320,10 @@
       const [names, setNames] = useState(Array.from({ length: 10 }, (_, i) => `Joueur ${i + 1}`));
       const setName = (i, v) => setNames(prev => prev.map((n, j) => j === i ? v : n));
 
-      // Adapter le nombre de joueurs si on passe au Tarot
+      // Adapter le nombre de joueurs selon le mode
       useEffect(() => {
         if (mode === "tarot" && (count < 3 || count > 5)) setCount(4);
+        if (mode === "belote") setCount(4); // La Belote classique se joue à 4
       }, [mode]);
 
       const availableCounts = mode === "tarot" ? [3, 4, 5] : [2, 3, 4, 5, 6, 7, 8, 9, 10];
@@ -337,6 +338,7 @@
             <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
               <button onClick={() => setMode("libre")} style={{ padding: "10px 20px", borderRadius: "8px", fontFamily: "Tahoma", fontWeight: 700, border: mode === "libre" ? "2px solid #4ade80" : "2px solid #1a3326", background: mode === "libre" ? "#4ade8022" : "transparent", color: mode === "libre" ? "#4ade80" : "#2d5a3d", cursor: "pointer" }}>Libre</button>
               <button onClick={() => setMode("tarot")} style={{ padding: "10px 20px", borderRadius: "8px", fontFamily: "Tahoma", fontWeight: 700, border: mode === "tarot" ? "2px solid #f59e0b" : "2px solid #1a3326", background: mode === "tarot" ? "#f59e0b22" : "transparent", color: mode === "tarot" ? "#f59e0b" : "#2d5a3d", cursor: "pointer" }}>🎴 Tarot (Auto)</button>
+              <button onClick={() => setMode("belote")} style={{ padding: "10px 20px", borderRadius: "8px", fontFamily: "Tahoma", fontWeight: 700, border: mode === "belote" ? "2px solid #3b82f6" : "2px solid #1a3326", background: mode === "belote" ? "#3b82f622" : "transparent", color: mode === "belote" ? "#3b82f6" : "#2d5a3d", cursor: "pointer" }}>♠️ Belote</button>
             </div>
           </div>
 
@@ -358,6 +360,8 @@
                   <span style={{ fontSize: "16px", color: ci.accent, flexShrink: 0 }}>{ci.suit}</span>
                   <input value={names[i]} onChange={e => setName(i, e.target.value)} placeholder={`Joueur ${i + 1}`} style={{ background: `${ci.accent}12`, border: `1.5px solid ${ci.accent}44`, borderRadius: "8px", color: "#a7f3d0", fontFamily: "Tahoma", fontWeight: 700, fontSize: "12px", padding: "7px 10px", outline: "none", width: "100%" }} />
                 </div>
+
+                
               );
             })}
           </div>
@@ -452,7 +456,125 @@
         </>
       );
     }
+    
+// --- MODE BELOTE ---
+    function RoundInputBelote({ players, roundNumber, onValidate }) {
+      const [preneur, setPreneur] = useState(players[0]?.id);
+      const [partenaire, setPartenaire] = useState(players[2]?.id || players[1]?.id); // Par défaut le joueur en face
+      const [points, setPoints] = useState("");
+      const [belote, setBelote] = useState("none"); // "none", "attaque", "defense"
+      const [capot, setCapot] = useState("none"); // "none", "attaque", "defense"
 
+      const calculate = () => {
+        let pts = parseInt(points, 10);
+        if (isNaN(pts) && capot === "none") return;
+
+        let scoreAttaque = 0;
+        let scoreDefense = 0;
+
+        // Gestion du Capot
+        if (capot === "attaque") {
+          scoreAttaque = 252;
+          scoreDefense = 0;
+        } else if (capot === "defense") {
+          scoreAttaque = 0;
+          scoreDefense = 252;
+        } else {
+          // Points normaux
+          let ptsAttaque = pts;
+          let ptsDefense = 162 - pts;
+
+          // Vérification de la chute (Dedans)
+          if (ptsAttaque <= 81) {
+            scoreAttaque = 0;
+            scoreDefense = 162; // La défense marque tous les points
+          } else {
+            scoreAttaque = ptsAttaque;
+            scoreDefense = ptsDefense;
+          }
+        }
+
+        // Ajout de la Belote/Rebelote
+        if (belote === "attaque") scoreAttaque += 20;
+        if (belote === "defense") scoreDefense += 20;
+
+        // Répartition des points
+        const scores = {};
+        players.forEach(p => {
+          if (p.id === preneur || p.id === partenaire) {
+            scores[p.id] = scoreAttaque;
+          } else {
+            scores[p.id] = scoreDefense;
+          }
+        });
+        
+        onValidate(scores);
+        setPoints("");
+        setCapot("none");
+        setBelote("none");
+      };
+
+      const btnStyle = (active, color = "#4ade80") => ({ padding: "6px 10px", borderRadius: "6px", fontFamily: "Tahoma", fontSize: "12px", fontWeight: 700, cursor: "pointer", border: active ? `1px solid ${color}` : "1px solid #2d5a3d", background: active ? `${color}22` : "transparent", color: active ? color : "#2d5a3d" });
+
+      return (
+        <div style={{ background: "rgba(0,0,0,0.35)", border: "1px solid #2d5a3d", borderRadius: "14px", overflow: "hidden" }}>
+          <div style={{ background: "rgba(0,0,0,0.3)", borderBottom: "1px solid #2d5a3d", padding: "10px 16px", display: "flex", alignItems: "center", gap: "10px" }}>
+            <span style={{ fontSize: "18px" }}>♠️</span><span style={{ fontFamily: "Tahoma", fontWeight: 700, color: "#4ade80", fontSize: "14px" }}>Manche {roundNumber} (Calcul Belote)</span>
+          </div>
+          
+          <div style={{ padding: "16px", display: "flex", flexDirection: "column", gap: "16px" }}>
+            {/* Rôles (L'équipe Attaquante) */}
+            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+              <div style={{ flex: 1, minWidth: "140px" }}>
+                <div style={{ fontSize: "10px", color: "#4ade8066", textTransform: "uppercase", marginBottom: "4px", fontFamily: "Tahoma" }}>Preneur</div>
+                <select value={preneur} onChange={e => setPreneur(parseInt(e.target.value))} style={{ width: "100%", padding: "8px", borderRadius: "6px", background: "#0f2d1e", color: "#a7f3d0", border: "1px solid #2d5a3d", fontFamily: "Tahoma" }}>
+                  {players.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                </select>
+              </div>
+              <div style={{ flex: 1, minWidth: "140px" }}>
+                <div style={{ fontSize: "10px", color: "#4ade8066", textTransform: "uppercase", marginBottom: "4px", fontFamily: "Tahoma" }}>Partenaire</div>
+                <select value={partenaire} onChange={e => setPartenaire(parseInt(e.target.value))} style={{ width: "100%", padding: "8px", borderRadius: "6px", background: "#0f2d1e", color: "#a7f3d0", border: "1px solid #2d5a3d", fontFamily: "Tahoma" }}>
+                  {players.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                </select>
+              </div>
+            </div>
+
+            {/* Options Spéciales */}
+            <div>
+              <div style={{ fontSize: "10px", color: "#4ade8066", textTransform: "uppercase", marginBottom: "6px", fontFamily: "Tahoma" }}>Belote et Rebelote (+20)</div>
+              <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
+                <button onClick={() => setBelote("none")} style={btnStyle(belote === "none")}>Aucune</button>
+                <button onClick={() => setBelote("attaque")} style={btnStyle(belote === "attaque")}>Attaque</button>
+                <button onClick={() => setBelote("defense")} style={btnStyle(belote === "defense", "#f87171")}>Défense</button>
+              </div>
+            </div>
+
+            <div>
+              <div style={{ fontSize: "10px", color: "#4ade8066", textTransform: "uppercase", marginBottom: "6px", fontFamily: "Tahoma" }}>Capot (252 pts)</div>
+              <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
+                <button onClick={() => setCapot("none")} style={btnStyle(capot === "none")}>Aucun</button>
+                <button onClick={() => setCapot("attaque")} style={btnStyle(capot === "attaque")}>Attaque</button>
+                <button onClick={() => setCapot("defense")} style={btnStyle(capot === "defense", "#f87171")}>Défense</button>
+              </div>
+            </div>
+
+            {/* Points (désactivé si capot) */}
+            {capot === "none" && (
+              <div>
+                <div style={{ fontSize: "10px", color: "#4ade8066", textTransform: "uppercase", marginBottom: "6px", fontFamily: "Tahoma" }}>Points de l'attaque (sans belote, max 162)</div>
+                <input type="number" value={points} onChange={e => setPoints(e.target.value)} placeholder="Ex: 92" onKeyDown={e => { if (e.key === "Enter") calculate(); }}
+                  style={{ width: "100px", background: "#1a473144", border: "1.5px solid #4ade8088", borderRadius: "8px", color: "#4ade80", fontFamily: "Tahoma", fontWeight: 700, fontSize: "16px", textAlign: "center", padding: "8px", outline: "none" }} />
+              </div>
+            )}
+          </div>
+
+          <div style={{ padding: "12px 16px", borderTop: "1px solid #2d5a3d22", display: "flex", justifyContent: "flex-end" }}>
+            <button onClick={calculate} disabled={points === "" && capot === "none"} style={{ padding: "10px 28px", borderRadius: "8px", background: (points === "" && capot === "none") ? "#1a3326" : "#4ade80", border: "none", color: (points === "" && capot === "none") ? "#2d5a3d" : "#052e16", fontFamily: "Tahoma", fontWeight: 700, cursor: (points === "" && capot === "none") ? "default" : "pointer" }}>✦ CALCULER & VALIDER</button>
+          </div>
+        </div>
+      );
+    }
+    
     // --- INITIALISATION REACT ---
     const root = ReactDOM.createRoot(document.getElementById('root'));
     root.render(<App />);
