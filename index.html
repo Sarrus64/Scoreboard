@@ -315,15 +315,15 @@
     }
 
     function SetupScreen({ onStart }) {
-      const [mode, setMode] = useState("libre"); // "libre" or "tarot"
+      const [mode, setMode] = useState("libre");
       const [count, setCount] = useState(4);
       const [names, setNames] = useState(Array.from({ length: 10 }, (_, i) => `Joueur ${i + 1}`));
+
       const setName = (i, v) => setNames(prev => prev.map((n, j) => j === i ? v : n));
 
-      // Adapter le nombre de joueurs selon le mode
       useEffect(() => {
         if (mode === "tarot" && (count < 3 || count > 5)) setCount(4);
-        if (mode === "belote") setCount(4); // La Belote classique se joue à 4
+        if (mode === "belote") setCount(4);
       }, [mode]);
 
       const availableCounts = mode === "tarot" ? [3, 4, 5] : [2, 3, 4, 5, 6, 7, 8, 9, 10];
@@ -342,29 +342,56 @@
             </div>
           </div>
 
-          <div style={{ marginBottom: "24px", textAlign: "center" }}>
-            <div style={{ fontSize: "10px", color: "#2d5a3d", textTransform: "uppercase", marginBottom: "12px", fontFamily: "Tahoma" }}>Nombre de joueurs</div>
-            <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", justifyContent: "center" }}>
-              {availableCounts.map(n => {
-                const ci = SUIT_COLORS[(n - 2) % SUIT_COLORS.length];
-                return <button key={n} onClick={() => setCount(n)} style={{ width: "42px", height: "42px", borderRadius: "8px", border: count === n ? `2px solid ${ci.accent}` : "2px solid #1a3326", background: count === n ? `${ci.accent}22` : "#0f2d1e", color: count === n ? ci.accent : "#2d5a3d", fontFamily: "Tahoma", fontWeight: 700, fontSize: "16px", cursor: "pointer" }}>{n}</button>;
+          {mode !== "belote" && (
+            <div style={{ marginBottom: "24px", textAlign: "center" }}>
+              <div style={{ fontSize: "10px", color: "#2d5a3d", textTransform: "uppercase", marginBottom: "12px", fontFamily: "Tahoma" }}>Nombre de joueurs</div>
+              <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", justifyContent: "center" }}>
+                {availableCounts.map(n => {
+                  const ci = SUIT_COLORS[(n - 2) % SUIT_COLORS.length];
+                  return <button key={n} onClick={() => setCount(n)} style={{ width: "42px", height: "42px", borderRadius: "8px", border: count === n ? `2px solid ${ci.accent}` : "2px solid #1a3326", background: count === n ? `${ci.accent}22` : "#0f2d1e", color: count === n ? ci.accent : "#2d5a3d", fontFamily: "Tahoma", fontWeight: 700, fontSize: "16px", cursor: "pointer" }}>{n}</button>;
+                })}
+              </div>
+            </div>
+          )}
+
+          {mode === "belote" ? (
+            <div style={{ display: "flex", flexDirection: "column", gap: "16px", width: "100%", maxWidth: "540px", marginBottom: "28px" }}>
+              {[0, 1].map(teamIdx => {
+                const teamColor = SUIT_COLORS[teamIdx * 2].accent;
+                return (
+                  <div key={teamIdx} style={{ background: "rgba(0,0,0,0.3)", border: "1px solid #2d5a3d", borderRadius: "12px", padding: "16px" }}>
+                    <div style={{ fontSize: "11px", color: teamColor, textTransform: "uppercase", fontFamily: "Tahoma", fontWeight: 700, marginBottom: "12px" }}>
+                      Équipe {teamIdx + 1}
+                    </div>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                      {[0, 1].map(playerIdx => {
+                        const i = teamIdx * 2 + playerIdx;
+                        const ci = SUIT_COLORS[i % SUIT_COLORS.length];
+                        return (
+                          <div key={i} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                            <span style={{ fontSize: "16px", color: ci.accent, flexShrink: 0 }}>{ci.suit}</span>
+                            <input value={names[i]} onChange={e => setName(i, e.target.value)} placeholder={`Joueur ${i + 1}`} style={{ background: `${ci.accent}12`, border: `1.5px solid ${ci.accent}44`, borderRadius: "8px", color: "#a7f3d0", fontFamily: "Tahoma", fontWeight: 700, fontSize: "12px", padding: "8px 10px", outline: "none", width: "100%" }} />
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
               })}
             </div>
-          </div>
-
-          <div style={{ display: "grid", gridTemplateColumns: count <= 4 ? "1fr 1fr" : "1fr 1fr 1fr", gap: "10px", width: "100%", maxWidth: "540px", marginBottom: "28px" }}>
-            {Array.from({ length: count }, (_, i) => {
-              const ci = SUIT_COLORS[i % SUIT_COLORS.length];
-              return (
-                <div key={i} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                  <span style={{ fontSize: "16px", color: ci.accent, flexShrink: 0 }}>{ci.suit}</span>
-                  <input value={names[i]} onChange={e => setName(i, e.target.value)} placeholder={`Joueur ${i + 1}`} style={{ background: `${ci.accent}12`, border: `1.5px solid ${ci.accent}44`, borderRadius: "8px", color: "#a7f3d0", fontFamily: "Tahoma", fontWeight: 700, fontSize: "12px", padding: "7px 10px", outline: "none", width: "100%" }} />
-                </div>
-
-                
-              );
-            })}
-          </div>
+          ) : (
+            <div style={{ display: "grid", gridTemplateColumns: count <= 4 ? "1fr 1fr" : "1fr 1fr 1fr", gap: "10px", width: "100%", maxWidth: "540px", marginBottom: "28px" }}>
+              {Array.from({ length: count }, (_, i) => {
+                const ci = SUIT_COLORS[i % SUIT_COLORS.length];
+                return (
+                  <div key={i} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <span style={{ fontSize: "16px", color: ci.accent, flexShrink: 0 }}>{ci.suit}</span>
+                    <input value={names[i]} onChange={e => setName(i, e.target.value)} placeholder={`Joueur ${i + 1}`} style={{ background: `${ci.accent}12`, border: `1.5px solid ${ci.accent}44`, borderRadius: "8px", color: "#a7f3d0", fontFamily: "Tahoma", fontWeight: 700, fontSize: "12px", padding: "7px 10px", outline: "none", width: "100%" }} />
+                  </div>
+                );
+              })}
+            </div>
+          )}
 
           <button onClick={() => onStart(count, names.slice(0, count), mode)} style={{ padding: "14px 48px", borderRadius: "10px", background: "linear-gradient(135deg, #4ade80, #22c55e)", border: "none", color: "#052e16", fontFamily: "Tahoma", fontWeight: 900, fontSize: "16px", cursor: "pointer" }}>✦ COMMENCER</button>
         </div>
@@ -381,10 +408,20 @@
       const nextId = useRef(0);
 
       const startGame = (count, names, mode) => { 
-        setPlayers(names.map((name, i) => ({ name, id: i }))); 
+        if (mode === "belote") {
+          // Fusionne les joueurs en 2 équipes
+          setPlayers([
+            { id: 0, name: `${names[0]} & ${names[1]}` },
+            { id: 1, name: `${names[2]} & ${names[3]}` }
+          ]);
+        } else {
+          setPlayers(names.map((name, i) => ({ name, id: i })));
+        }
+        
         setGameMode(mode);
         nextId.current = 0; setRounds([]); setTab("saisie"); setGameStarted(true); 
       };
+
       const updateName = (id, name) => setPlayers(prev => prev.map(p => p.id === id ? { ...p, name } : p));
       const addRound = scores => { setRounds(prev => [...prev, { id: nextId.current++, scores }]); setTab("historique"); };
       const deleteRound = id => setRounds(prev => prev.filter(r => r.id !== id));
@@ -419,7 +456,7 @@
               </div>
             )}
 
-            {/* --- CARTES DES JOUEURS --- */}
+            {/* --- CARTES DES JOUEURS / ÉQUIPES --- */}
             <div style={{ display: "grid", gridTemplateColumns: `repeat(auto-fit, minmax(120px, 1fr))`, gap: "12px" }}>
               {players.map((p, i) => (
                 <PlayerCard 
@@ -433,9 +470,9 @@
               ))}
             </div>
 
-            {/* --- CONTENU PRINCIPAL (ONGLETS) --- */}
+            {/* --- CONTENU PRINCIPAL --- */}
             {tab === "saisie" ? (
-              gameMode === "classique" ? <RoundInputClassic players={players} roundNumber={rounds.length + 1} onValidate={addRound} />
+              gameMode === "libre" ? <RoundInputClassic players={players} roundNumber={rounds.length + 1} onValidate={addRound} />
               : gameMode === "tarot" ? <RoundInputTarot players={players} roundNumber={rounds.length + 1} onValidate={addRound} />
               : <RoundInputBelote players={players} roundNumber={rounds.length + 1} onValidate={addRound} />
             ) : (
@@ -459,8 +496,8 @@
     
 // --- MODE BELOTE ---
     function RoundInputBelote({ players, roundNumber, onValidate }) {
-      const [preneur, setPreneur] = useState(players[0]?.id);
-      const [partenaire, setPartenaire] = useState(players[2]?.id || players[1]?.id); // Par défaut le joueur en face
+      // players contient désormais les 2 équipes
+      const [preneur, setPreneur] = useState(players[0]?.id); 
       const [points, setPoints] = useState("");
       const [belote, setBelote] = useState("none"); // "none", "attaque", "defense"
       const [capot, setCapot] = useState("none"); // "none", "attaque", "defense"
@@ -498,10 +535,10 @@
         if (belote === "attaque") scoreAttaque += 20;
         if (belote === "defense") scoreDefense += 20;
 
-        // Répartition des points
+        // Répartition des points par équipe
         const scores = {};
         players.forEach(p => {
-          if (p.id === preneur || p.id === partenaire) {
+          if (p.id === preneur) {
             scores[p.id] = scoreAttaque;
           } else {
             scores[p.id] = scoreDefense;
@@ -523,17 +560,12 @@
           </div>
           
           <div style={{ padding: "16px", display: "flex", flexDirection: "column", gap: "16px" }}>
-            {/* Rôles (L'équipe Attaquante) */}
+            
+            {/* L'équipe Attaquante */}
             <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
               <div style={{ flex: 1, minWidth: "140px" }}>
-                <div style={{ fontSize: "10px", color: "#4ade8066", textTransform: "uppercase", marginBottom: "4px", fontFamily: "Tahoma" }}>Preneur</div>
+                <div style={{ fontSize: "10px", color: "#4ade8066", textTransform: "uppercase", marginBottom: "4px", fontFamily: "Tahoma" }}>Équipe Preneuse (Attaque)</div>
                 <select value={preneur} onChange={e => setPreneur(parseInt(e.target.value))} style={{ width: "100%", padding: "8px", borderRadius: "6px", background: "#0f2d1e", color: "#a7f3d0", border: "1px solid #2d5a3d", fontFamily: "Tahoma" }}>
-                  {players.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-                </select>
-              </div>
-              <div style={{ flex: 1, minWidth: "140px" }}>
-                <div style={{ fontSize: "10px", color: "#4ade8066", textTransform: "uppercase", marginBottom: "4px", fontFamily: "Tahoma" }}>Partenaire</div>
-                <select value={partenaire} onChange={e => setPartenaire(parseInt(e.target.value))} style={{ width: "100%", padding: "8px", borderRadius: "6px", background: "#0f2d1e", color: "#a7f3d0", border: "1px solid #2d5a3d", fontFamily: "Tahoma" }}>
                   {players.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                 </select>
               </div>
@@ -558,7 +590,7 @@
               </div>
             </div>
 
-            {/* Points (désactivé si capot) */}
+            {/* Points */}
             {capot === "none" && (
               <div>
                 <div style={{ fontSize: "10px", color: "#4ade8066", textTransform: "uppercase", marginBottom: "6px", fontFamily: "Tahoma" }}>Points de l'attaque (sans belote, max 162)</div>
