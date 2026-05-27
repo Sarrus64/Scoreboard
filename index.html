@@ -366,10 +366,12 @@
     if (!video || !video.videoWidth) return;
 
     const canvas = document.createElement("canvas");
-    // On force un format carré parfait basé sur la plus petite dimension
-    const size = Math.min(video.videoWidth, video.videoHeight);
-    canvas.width = size;
-    canvas.height = size;
+    
+    // On force un petit format (250x250). 
+    // Plus l'image est petite, plus le trait noir du contour paraîtra épais (façon comics) !
+    const outputSize = 250;
+    canvas.width = outputSize;
+    canvas.height = outputSize;
     const ctx = canvas.getContext("2d");
     
     // Effet miroir QUE sur la caméra frontale
@@ -378,42 +380,58 @@
       ctx.scale(-1, 1);
     }
     
-    // 1. Préparation : on booste le contraste et la saturation avant de dessiner
-    ctx.filter = "contrast(1.4) saturate(1.8) brightness(1.1)";
+    // 1. On booste la saturation à fond AVANT de dessiner
+    ctx.filter = "contrast(1.5) saturate(3) brightness(1.2)";
     
-    // On centre la vidéo pour la recadrer en carré
-    const offsetX = (video.videoWidth - size) / 2;
-    const offsetY = (video.videoHeight - size) / 2;
-    ctx.drawImage(video, offsetX, offsetY, size, size, 0, 0, size, size);
+    // On dessine en recadrant le centre de la vidéo
+    const minVideoSize = Math.min(video.videoWidth, video.videoHeight);
+    const offsetX = (video.videoWidth - minVideoSize) / 2;
+    const offsetY = (video.videoHeight - minVideoSize) / 2;
+    ctx.drawImage(video, offsetX, offsetY, minVideoSize, minVideoSize, 0, 0, outputSize, outputSize);
     
-    // 2. Magie "Cartoon" : Manipulation des pixels (Postérisation)
-    const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    // 2. Magie "Cartoon" : Détection des bords et aplats de couleurs
+    const imgData = ctx.getImageData(0, 0, outputSize, outputSize);
     const data = imgData.data;
-    
-    // Le nombre de "paliers" de couleurs (4 ou 5 donne un super effet BD)
-    const levels = 5; 
-    const step = 255 / levels;
+    // On garde une copie de l'image originale pour comparer les pixels entre eux
+    const oldData = new Uint8ClampedArray(data); 
 
-    for (let i = 0; i < data.length; i += 4) {
-      // On arrondit les valeurs RGB pour créer des "aplats" de couleurs
-      data[i] = Math.round((data[i] / 255) * levels) * step;     // R
-      data[i + 1] = Math.round((data[i + 1] / 255) * levels) * step; // G
-      data[i + 2] = Math.round((data[i + 2] / 255) * levels) * step; // B
-      
-      // Optionnel : On force les pixels très sombres à devenir tout noirs 
-      // pour simuler les "traits" ou les ombres fortes d'un dessin
-      const avg = (data[i] + data[i+1] + data[i+2]) / 3;
-      if (avg < 45) {
-         data[i] = 10;
-         data[i+1] = 20;
-         data[i+2] = 25; // Un noir très légèrement bleuté
+    for (let y = 0; y < outputSize; y++) {
+      for (let x = 0; x < outputSize; x++) {
+        const i = (y * outputSize + x) * 4;
+
+        // On regarde les pixels voisins (en bas et à droite)
+        const rightI = (y * outputSize + Math.min(x + 1, outputSize - 1)) * 4;
+        const bottomI = (Math.min(y + 1, outputSize - 1) * outputSize + x) * 4;
+
+        // On calcule la luminosité du pixel actuel et des voisins
+        const luma = 0.3 * oldData[i] + 0.59 * oldData[i+1] + 0.11 * oldData[i+2];
+        const lumaR = 0.3 * oldData[rightI] + 0.59 * oldData[rightI+1] + 0.11 * oldData[rightI+2];
+        const lumaB = 0.3 * oldData[bottomI] + 0.59 * oldData[bottomI+1] + 0.11 * oldData[bottomI+2];
+
+        // Différence de lumière = C'est une bordure !
+        const diff = Math.abs(luma - lumaR) + Math.abs(luma - lumaB);
+
+        // Si la différence est grande (contour) OU que c'est une zone très sombre (ombre)
+        if (diff > 30 || luma < 45) {
+          data[i] = 10;     // R : Trait noir très profond
+          data[i+1] = 15;   // G
+          data[i+2] = 25;   // B (légèrement bleuté pour le style)
+        } else {
+          // Sinon : Remplissage avec des couleurs ultra basiques (Seulement 3 paliers)
+          const levels = 3; 
+          const step = 255 / levels;
+          
+          data[i] = Math.round((oldData[i] / 255) * levels) * step;
+          data[i+1] = Math.round((oldData[i+1] / 255) * levels) * step;
+          data[i+2] = Math.round((oldData[i+2] / 255) * levels) * step;
+        }
       }
     }
     
-    // On remet les pixels modifiés dans le canvas
+    // On remet les pixels transformés dans le canvas
     ctx.putImageData(imgData, 0, 0);
     
-    onCapture(canvas.toDataURL("image/jpeg", 0.8));
+    onCapture(canvas.toDataURL("image/jpeg", 0.9));
   };
 
   const toggleCamera = () => {
