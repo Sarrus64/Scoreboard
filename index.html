@@ -380,8 +380,7 @@
       const updateData = (i, key, value) => {
       setPlayersData(prev => prev.map((p, j) => j === i ? { ...p, [key]: value } : p));
 };
-      const setName = (i, v) => setNames(prev => prev.map((n, j) => j === i ? v : n));
-
+    
       useEffect(() => {
         if (mode === "tarot" && (count < 3 || count > 5)) setCount(4);
         if (mode === "belote") setCount(4);
@@ -390,9 +389,10 @@
       const availableCounts = mode === "tarot" ? [3, 4, 5] : [2, 3, 4, 5, 6, 7, 8, 9, 10];
 
       return (
+        <> {/* <-- AJOUTE CETTE BALISE OUVRANTE ICI */}
         <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "32px 16px", position: "relative", zIndex: 1 }}>
           <h1 style={{ fontFamily: "Tahoma", fontWeight: 900, fontSize: "clamp(30px, 7vw, 48px)", color: "#f0fdf4", letterSpacing: "0.04em", marginBottom: "32px", textShadow: "0 0 40px #4ade8044" }}>SCOREBOARD</h1>
-
+          
           {/* SÉLECTION DU MODE */}
           <div style={{ marginBottom: "24px", textAlign: "center" }}>
             <div style={{ fontSize: "10px", color: "#2d5a3d", textTransform: "uppercase", marginBottom: "12px", fontFamily: "Tahoma" }}>Mode de jeu</div>
@@ -498,11 +498,13 @@
         </div>
 
         {activeCameraFor !== null && (
+
   <CameraCapture 
     onCapture={(imgData) => { updateData(activeCameraFor, "avatar", imgData); setActiveCameraFor(null); }} 
     onClose={() => setActiveCameraFor(null)} 
   />
 )}
+        </> {/* <-- AJOUTE CETTE BALISE FERMANTE ICI */}
       );
     }
 
