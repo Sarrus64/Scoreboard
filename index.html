@@ -418,94 +418,141 @@
     );
   }
     
+    // ==========================================
+    // 1. FONCTION DE TRANSFORMATION CLOUDINARY
+    // ==========================================
+    const appelerApiIaTransform = async (imageBase64) => {
+      // ⚠️ METTEZ VOS PROPRES COORDONNÉES CLOUDINARY ICI
+      const CLOUD_NAME = "dqxzuvbdl"; 
+      const UPLOAD_PRESET = "efzzs2se"; 
+
+      const formData = new FormData();
+      formData.append("file", imageBase64);
+      formData.append("upload_preset", UPLOAD_PRESET);
+
+      const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+        method: "POST",
+        body: formData
+      });
+
+      if (!response.ok) throw new Error("Échec Cloudinary");
+
+      const data = await response.json();
+      const urlOriginale = data.secure_url;
+
+      // Injection des filtres IA (effet cartoon + détection et centrage sur le visage)
+      return urlOriginale.replace(
+        "/upload/", 
+        "/upload/e_cartoonify:20:70,c_thumb,g_face,w_200,h_200/"
+      );
+    };
+
+    // ==========================================
+    // 2. ÉCRAN DE CONFIGURATION MODIFIÉ
+    // ==========================================
     function SetupScreen({ onStart }) {
-      const [mode, setMode] = useState("libre");
-      const [count, setCount] = useState(4);
-      // On stocke le type de choix ("name" ou "avatar"), le texte saisi, et la photo en base64
+      const [mode, setMode] = useState("libre"); [cite: 100]
+      const [count, setCount] = useState(4); [cite: 101]
       const [playersData, setPlayersData] = useState(Array.from({ length: 10 }, (_, i) => ({ 
             type: "name", 
             name: `Joueur ${i + 1}`, 
             avatar: null 
-            })));
-      const [activeCameraFor, setActiveCameraFor] = useState(null);
+            }))); [cite: 101]
+      const [activeCameraFor, setActiveCameraFor] = useState(null); [cite: 102]
+      
+      // État pour afficher l'overlay pendant le traitement IA
+      const [isProcessingIA, setIsProcessingIA] = useState(false);
 
       const updateData = (i, key, value) => {
-      setPlayersData(prev => prev.map((p, j) => j === i ? { ...p, [key]: value } : p));
-};
+        setPlayersData(prev => prev.map((p, j) => j === i ? { ...p, [key]: value } : p)); [cite: 102]
+      };
     
       useEffect(() => {
-        if (mode === "tarot" && (count < 3 || count > 5)) setCount(4);
-        if (mode === "belote") setCount(4);
-      }, [mode]);
+        if (mode === "tarot" && (count < 3 || count > 5)) setCount(4); [cite: 103]
+        if (mode === "belote") setCount(4); [cite: 103]
+      }, [mode]); [cite: 103]
 
-      const availableCounts = mode === "tarot" ? [3, 4, 5] : [2, 3, 4, 5, 6, 7, 8, 9, 10];
+      const availableCounts = mode === "tarot" ? [3, 4, 5] : [2, 3, 4, 5, 6, 7, 8, 9, 10]; [cite: 104]
+
+      // Logique d'interception de la photo
+      const handleCaptureAndTransform = async (originalImgData, playerIndex) => {
+        setActiveCameraFor(null); // Ferme la caméra 
+        setIsProcessingIA(true);  // Déclenche l'écran de chargement
+
+        try {
+          // Envoi et transformation IA
+          const comicAvatar = await appelerApiIaTransform(originalImgData);
+          updateData(playerIndex, "avatar", comicAvatar);
+        } catch (error) {
+          console.error(error);
+          alert("Erreur de connexion à l'IA. La photo originale sera conservée pour cette fois !");
+          updateData(playerIndex, "avatar", originalImgData); // Sécurité
+        } finally {
+          setIsProcessingIA(false); // Coupe le chargement quoi qu'il arrive
+        }
+      };
 
       return (
-        <> {/* <-- AJOUTE CETTE BALISE OUVRANTE ICI */}
-        <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "32px 16px", position: "relative", zIndex: 1 }}>
-          <h1 style={{ fontFamily: "Tahoma", fontWeight: 900, fontSize: "clamp(30px, 7vw, 48px)", color: "#f0fdf4", letterSpacing: "0.04em", marginBottom: "32px", textShadow: "0 0 40px #4ade8044" }}>SCOREBOARD</h1>
+        <>
+        <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "32px 16px", position: "relative", zIndex: 1 }}> [cite: 105]
+          <h1 style={{ fontFamily: "Tahoma", fontWeight: 900, fontSize: "clamp(30px, 7vw, 48px)", color: "#f0fdf4", letterSpacing: "0.04em", marginBottom: "32px", textShadow: "0 0 40px #4ade8044" }}>SCOREBOARD</h1> [cite: 105]
           
-          {/* SÉLECTION DU MODE */}
-          <div style={{ marginBottom: "24px", textAlign: "center" }}>
-            <div style={{ fontSize: "10px", color: "#2d5a3d", textTransform: "uppercase", marginBottom: "12px", fontFamily: "Tahoma" }}>Mode de jeu</div>
-            <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
-              <button onClick={() => setMode("libre")} style={{ padding: "10px 20px", borderRadius: "8px", fontFamily: "Tahoma", fontWeight: 700, border: mode === "libre" ? "2px solid #4ade80" : "2px solid #1a3326", background: mode === "libre" ? "#4ade8022" : "transparent", color: mode === "libre" ? "#4ade80" : "#2d5a3d", cursor: "pointer" }}>Libre</button>
-              <button onClick={() => setMode("tarot")} style={{ padding: "10px 20px", borderRadius: "8px", fontFamily: "Tahoma", fontWeight: 700, border: mode === "tarot" ? "2px solid #f59e0b" : "2px solid #1a3326", background: mode === "tarot" ? "#f59e0b22" : "transparent", color: mode === "tarot" ? "#f59e0b" : "#2d5a3d", cursor: "pointer" }}>🎴 Tarot (Auto)</button>
-              <button onClick={() => setMode("belote")} style={{ padding: "10px 20px", borderRadius: "8px", fontFamily: "Tahoma", fontWeight: 700, border: mode === "belote" ? "2px solid #3b82f6" : "2px solid #1a3326", background: mode === "belote" ? "#3b82f622" : "transparent", color: mode === "belote" ? "#3b82f6" : "#2d5a3d", cursor: "pointer" }}>♠️ Belote</button>
+          {/* Mode de jeu */}
+          <div style={{ marginBottom: "24px", textAlign: "center" }}> [cite: 106]
+            <div style={{ fontSize: "10px", color: "#2d5a3d", textTransform: "uppercase", marginBottom: "12px", fontFamily: "Tahoma" }}>Mode de jeu</div> [cite: 106]
+            <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}> [cite: 106]
+              <button onClick={() => setMode("libre")} style={{ padding: "10px 20px", borderRadius: "8px", fontFamily: "Tahoma", fontWeight: 700, border: mode === "libre" ? "2px solid #4ade80" : "2px solid #1a3326", background: mode === "libre" ? "#4ade8022" : "transparent", color: mode === "libre" ? "#4ade80" : "#2d5a3d", cursor: "pointer" }}>Libre</button> [cite: 106, 107, 108]
+              <button onClick={() => setMode("tarot")} style={{ padding: "10px 20px", borderRadius: "8px", fontFamily: "Tahoma", fontWeight: 700, border: mode === "tarot" ? "2px solid #f59e0b" : "2px solid #1a3326", background: mode === "tarot" ? "#f59e0b22" : "transparent", color: mode === "tarot" ? "#f59e0b" : "#2d5a3d", cursor: "pointer" }}>🎴 Tarot (Auto)</button> [cite: 108, 109, 110]
+              <button onClick={() => setMode("belote")} style={{ padding: "10px 20px", borderRadius: "8px", fontFamily: "Tahoma", fontWeight: 700, border: mode === "belote" ? "2px solid #3b82f6" : "2px solid #1a3326", background: mode === "belote" ? "#3b82f622" : "transparent", color: mode === "belote" ? "#3b82f6" : "#2d5a3d", cursor: "pointer" }}>♠️ Belote</button> [cite: 110, 111, 112]
             </div>
           </div>
 
-          {mode !== "belote" && (
-            <div style={{ marginBottom: "24px", textAlign: "center" }}>
-              <div style={{ fontSize: "10px", color: "#2d5a3d", textTransform: "uppercase", marginBottom: "12px", fontFamily: "Tahoma" }}>Nombre de joueurs</div>
-              <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", justifyContent: "center" }}>
+          {mode !== "belote" && ( [cite: 112]
+            <div style={{ marginBottom: "24px", textAlign: "center" }}> [cite: 112]
+              <div style={{ fontSize: "10px", color: "#2d5a3d", textTransform: "uppercase", marginBottom: "12px", fontFamily: "Tahoma" }}>Nombre de joueurs</div> [cite: 112]
+              <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", justifyContent: "center" }}> [cite: 113]
                 {availableCounts.map(n => {
-                  const ci = SUIT_COLORS[(n - 2) % SUIT_COLORS.length];
-                  return <button key={n} onClick={() => setCount(n)} style={{ width: "42px", height: "42px", borderRadius: "8px", border: count === n ? `2px solid ${ci.accent}` : "2px solid #1a3326", background: count === n ? `${ci.accent}22` : "#0f2d1e", color: count === n ? ci.accent : "#2d5a3d", fontFamily: "Tahoma", fontWeight: 700, fontSize: "16px", cursor: "pointer" }}>{n}</button>;
+                  const ci = SUIT_COLORS[(n - 2) % SUIT_COLORS.length]; [cite: 113]
+                  return <button key={n} onClick={() => setCount(n)} style={{ width: "42px", height: "42px", borderRadius: "8px", border: count === n ? `2px solid ${ci.accent}` : "2px solid #1a3326", background: count === n ? `${ci.accent}22` : "#0f2d1e", color: count === n ? ci.accent : "#2d5a3d", fontFamily: "Tahoma", fontWeight: 700, fontSize: "16px", cursor: "pointer" }}>{n}</button>; [cite: 113, 114]
                 })}
               </div>
             </div>
           )}
 
-          {mode === "belote" ? (
-            <div style={{ display: "flex", flexDirection: "column", gap: "16px", width: "100%", maxWidth: "540px", marginBottom: "28px" }}>
+          {/* Grille des joueurs (générique Belote ou autre) */}
+          {mode === "belote" ? ( [cite: 114, 115]
+            <div style={{ display: "flex", flexDirection: "column", gap: "16px", width: "100%", maxWidth: "540px", marginBottom: "28px" }}> [cite: 115]
               {[0, 1].map(teamIdx => {
-                const teamColor = SUIT_COLORS[teamIdx * 2].accent;
+                const teamColor = SUIT_COLORS[teamIdx * 2].accent; [cite: 115]
                 return (
-                  <div key={teamIdx} style={{ background: "rgba(0,0,0,0.3)", border: "1px solid #2d5a3d", borderRadius: "12px", padding: "16px" }}>
-                    <div style={{ fontSize: "11px", color: teamColor, textTransform: "uppercase", fontFamily: "Tahoma", fontWeight: 700, marginBottom: "12px" }}>
-                      Équipe {teamIdx + 1}
-                    </div>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                  <div key={teamIdx} style={{ background: "rgba(0,0,0,0.3)", border: "1px solid #2d5a3d", borderRadius: "12px", padding: "16px" }}> [cite: 116]
+                    <div style={{ fontSize: "11px", color: teamColor, textTransform: "uppercase", fontFamily: "Tahoma", fontWeight: 700, marginBottom: "12px" }}>Équipe {teamIdx + 1}</div> [cite: 116]
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}> [cite: 117]
                       {[0, 1].map(playerIdx => {
-                        const i = teamIdx * 2 + playerIdx;
-                        const ci = SUIT_COLORS[i % SUIT_COLORS.length];
+                        const i = teamIdx * 2 + playerIdx; [cite: 117]
+                        const ci = SUIT_COLORS[i % SUIT_COLORS.length]; [cite: 118]
                         return (
-  <div key={i} style={{ display: "flex", flexDirection: "column", gap: "8px", padding: "10px", background: `${ci.accent}12`, border: `1px solid ${ci.accent}44`, borderRadius: "8px" }}>
-    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-      <span style={{ fontSize: "14px", color: ci.accent, fontWeight: "bold" }}>{ci.suit} J{i + 1}</span>
-      
-      {/* LE CHOIX EXPLICITE : NOM OU PHOTO */}
-      <div style={{ display: "flex", background: "rgba(0,0,0,0.4)", borderRadius: "6px", padding: "2px" }}>
-        <button onClick={() => updateData(i, "type", "name")} style={{ padding: "4px 8px", fontSize: "11px", borderRadius: "4px", border: "none", background: playersData[i].type === "name" ? ci.accent : "transparent", color: playersData[i].type === "name" ? "#000" : ci.accent, cursor: "pointer" }}>✍️ Nom</button>
-        <button onClick={() => updateData(i, "type", "avatar")} style={{ padding: "4px 8px", fontSize: "11px", borderRadius: "4px", border: "none", background: playersData[i].type === "avatar" ? ci.accent : "transparent", color: playersData[i].type === "avatar" ? "#000" : ci.accent, cursor: "pointer" }}>📸 Photo</button>
-      </div>
-    </div>
-    
-    {/* L'AFFICHAGE CONDITIONNEL */}
-    {playersData[i].type === "name" ? (
-      <input value={playersData[i].name} onChange={e => updateData(i, "name", e.target.value)} placeholder={`Joueur ${i + 1}`} style={{ background: "rgba(0,0,0,0.2)", border: "none", borderRadius: "6px", color: "#a7f3d0", fontFamily: "Tahoma", fontSize: "12px", padding: "8px", outline: "none", width: "100%" }} />
-    ) : (
-      <div style={{ display: "flex", justifyContent: "center" }}>
-        {playersData[i].avatar ? (
-          <img src={playersData[i].avatar} onClick={() => setActiveCameraFor(i)} alt="Avatar" style={{ width: "48px", height: "48px", borderRadius: "50%", objectFit: "cover", filter: "contrast(1.3) saturate(1.2) sepia(0.4) hue-rotate(-10deg)", cursor: "pointer", border: `2px solid ${ci.accent}` }} title="Cliquez pour refaire la photo" />
-        ) : (
-          <button onClick={() => setActiveCameraFor(i)} style={{ padding: "8px", borderRadius: "6px", background: "transparent", border: `1px dashed ${ci.accent}`, color: ci.accent, cursor: "pointer", width: "100%", fontSize: "11px" }}>Capturer le visage</button>
-        )}
-      </div>
-    )}
-  </div>
-);
+                          <div key={i} style={{ display: "flex", flexDirection: "column", gap: "8px", padding: "10px", background: `${ci.accent}12`, border: `1px solid ${ci.accent}44`, borderRadius: "8px" }}> [cite: 118]
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}> [cite: 118]
+                              <span style={{ fontSize: "14px", color: ci.accent, fontWeight: "bold" }}>{ci.suit} J{i + 1}</span> [cite: 118]
+                              <div style={{ display: "flex", background: "rgba(0,0,0,0.4)", borderRadius: "6px", padding: "2px" }}> [cite: 118, 119]
+                                <button onClick={() => updateData(i, "type", "name")} style={{ padding: "4px 8px", fontSize: "11px", borderRadius: "4px", border: "none", background: playersData[i].type === "name" ? ci.accent : "transparent", color: playersData[i].type === "name" ? "#000" : ci.accent, cursor: "pointer" }}>✍️ Nom</button> [cite: 119, 120]
+                                <button onClick={() => updateData(i, "type", "avatar")} style={{ padding: "4px 8px", fontSize: "11px", borderRadius: "4px", border: "none", background: playersData[i].type === "avatar" ? ci.accent : "transparent", color: playersData[i].type === "avatar" ? "#000" : ci.accent, cursor: "pointer" }}>📸 Photo</button> [cite: 120, 121]
+                              </div>
+                            </div>
+                            {playersData[i].type === "name" ? ( [cite: 121, 122]
+                              <input value={playersData[i].name} onChange={e => updateData(i, "name", e.target.value)} placeholder={`Joueur ${i + 1}`} style={{ background: "rgba(0,0,0,0.2)", border: "none", borderRadius: "6px", color: "#a7f3d0", fontFamily: "Tahoma", fontSize: "12px", padding: "8px", outline: "none", width: "100%" }} /> [cite: 122]
+                            ) : (
+                              <div style={{ display: "flex", justifyContent: "center" }}> [cite: 122]
+                                {playersData[i].avatar ? ( [cite: 122]
+                                  <img src={playersData[i].avatar} onClick={() => setActiveCameraFor(i)} alt="Avatar" style={{ width: "48px", height: "48px", borderRadius: "50%", objectFit: "cover", filter: "contrast(1.3) saturate(1.2) sepia(0.4) hue-rotate(-10deg)", cursor: "pointer", border: `2px solid ${ci.accent}` }} title="Cliquez pour refaire la photo" /> [cite: 122, 123]
+                                ) : (
+                                  <button onClick={() => setActiveCameraFor(i)} style={{ padding: "8px", borderRadius: "6px", background: "transparent", border: `1px dashed ${ci.accent}`, color: ci.accent, cursor: "pointer", width: "100%", fontSize: "11px" }}>Capturer le visage</button> [cite: 123]
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        );
                       })}
                     </div>
                   </div>
@@ -513,49 +560,58 @@
               })}
             </div>
           ) : (
-            <div style={{ display: "grid", gridTemplateColumns: count <= 4 ? "1fr 1fr" : "1fr 1fr 1fr", gap: "10px", width: "100%", maxWidth: "540px", marginBottom: "28px" }}>
+            <div style={{ display: "grid", gridTemplateColumns: count <= 4 ? "1fr 1fr" : "1fr 1fr 1fr", gap: "10px", width: "100%", maxWidth: "540px", marginBottom: "28px" }}> [cite: 125]
               {Array.from({ length: count }, (_, i) => {
-                const ci = SUIT_COLORS[i % SUIT_COLORS.length];
+                const ci = SUIT_COLORS[i % SUIT_COLORS.length]; [cite: 125, 126]
                 return (
-  <div key={i} style={{ display: "flex", flexDirection: "column", gap: "8px", padding: "10px", background: `${ci.accent}12`, border: `1px solid ${ci.accent}44`, borderRadius: "8px" }}>
-    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-      <span style={{ fontSize: "14px", color: ci.accent, fontWeight: "bold" }}>{ci.suit} J{i + 1}</span>
-      
-      {/* LE CHOIX EXPLICITE : NOM OU PHOTO */}
-      <div style={{ display: "flex", background: "rgba(0,0,0,0.4)", borderRadius: "6px", padding: "2px" }}>
-        <button onClick={() => updateData(i, "type", "name")} style={{ padding: "4px 8px", fontSize: "11px", borderRadius: "4px", border: "none", background: playersData[i].type === "name" ? ci.accent : "transparent", color: playersData[i].type === "name" ? "#000" : ci.accent, cursor: "pointer" }}>✍️ Nom</button>
-        <button onClick={() => updateData(i, "type", "avatar")} style={{ padding: "4px 8px", fontSize: "11px", borderRadius: "4px", border: "none", background: playersData[i].type === "avatar" ? ci.accent : "transparent", color: playersData[i].type === "avatar" ? "#000" : ci.accent, cursor: "pointer" }}>📸 Photo</button>
-      </div>
-    </div>
-    
-    {/* L'AFFICHAGE CONDITIONNEL */}
-    {playersData[i].type === "name" ? (
-      <input value={playersData[i].name} onChange={e => updateData(i, "name", e.target.value)} placeholder={`Joueur ${i + 1}`} style={{ background: "rgba(0,0,0,0.2)", border: "none", borderRadius: "6px", color: "#a7f3d0", fontFamily: "Tahoma", fontSize: "12px", padding: "8px", outline: "none", width: "100%" }} />
-    ) : (
-      <div style={{ display: "flex", justifyContent: "center" }}>
-        {playersData[i].avatar ? (
-          <img src={playersData[i].avatar} onClick={() => setActiveCameraFor(i)} alt="Avatar" style={{ width: "48px", height: "48px", borderRadius: "50%", objectFit: "cover", filter: "contrast(1.3) saturate(1.2) sepia(0.4) hue-rotate(-10deg)", cursor: "pointer", border: `2px solid ${ci.accent}` }} title="Cliquez pour refaire la photo" />
-        ) : (
-          <button onClick={() => setActiveCameraFor(i)} style={{ padding: "8px", borderRadius: "6px", background: "transparent", border: `1px dashed ${ci.accent}`, color: ci.accent, cursor: "pointer", width: "100%", fontSize: "11px" }}>Capturer le visage</button>
-        )}
-      </div>
-    )}
-  </div>
-);
+                  <div key={i} style={{ display: "flex", flexDirection: "column", gap: "8px", padding: "10px", background: `${ci.accent}12`, border: `1px solid ${ci.accent}44`, borderRadius: "8px" }}> [cite: 126]
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}> [cite: 126]
+                      <span style={{ fontSize: "14px", color: ci.accent, fontWeight: "bold" }}>{ci.suit} J{i + 1}</span> [cite: 126]
+                      <div style={{ display: "flex", background: "rgba(0,0,0,0.4)", borderRadius: "6px", padding: "2px" }}> [cite: 126, 127]
+                        <button onClick={() => updateData(i, "type", "name")} style={{ padding: "4px 8px", fontSize: "11px", borderRadius: "4px", border: "none", background: playersData[i].type === "name" ? ci.accent : "transparent", color: playersData[i].type === "name" ? "#000" : ci.accent, cursor: "pointer" }}>✍️ Nom</button> [cite: 127, 128]
+                        <button onClick={() => updateData(i, "type", "avatar")} style={{ padding: "4px 8px", fontSize: "11px", borderRadius: "4px", border: "none", background: playersData[i].type === "avatar" ? ci.accent : "transparent", color: playersData[i].type === "avatar" ? "#000" : ci.accent, cursor: "pointer" }}>📸 Photo</button> [cite: 128, 129]
+                      </div>
+                    </div>
+                    {playersData[i].type === "name" ? ( [cite: 129, 130]
+                      <input value={playersData[i].name} onChange={e => updateData(i, "name", e.target.value)} placeholder={`Joueur ${i + 1}`} style={{ background: "rgba(0,0,0,0.2)", border: "none", borderRadius: "6px", color: "#a7f3d0", fontFamily: "Tahoma", fontSize: "12px", padding: "8px", outline: "none", width: "100%" }} /> [cite: 130]
+                    ) : (
+                      <div style={{ display: "flex", justifyContent: "center" }}> [cite: 130]
+                        {playersData[i].avatar ? ( [cite: 130]
+                          <img src={playersData[i].avatar} onClick={() => setActiveCameraFor(i)} alt="Avatar" style={{ width: "48px", height: "48px", borderRadius: "50%", objectFit: "cover", filter: "contrast(1.3) saturate(1.2) sepia(0.4) hue-rotate(-10deg)", cursor: "pointer", border: `2px solid ${ci.accent}` }} title="Cliquez pour refaire la photo" /> [cite: 130, 131]
+                        ) : (
+                          <button onClick={() => setActiveCameraFor(i)} style={{ padding: "8px", borderRadius: "6px", background: "transparent", border: `1px dashed ${ci.accent}`, color: ci.accent, cursor: "pointer", width: "100%", fontSize: "11px" }}>Capturer le visage</button> [cite: 131]
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
               })}
             </div>
           )}
 
-          <button onClick={() => onStart(count, playersData.slice(0, count), mode)} style={{ padding: "14px 48px", borderRadius: "10px", background: "linear-gradient(135deg, #4ade80, #22c55e)", border: "none", color: "#052e16", fontFamily: "Tahoma", fontWeight: 900, fontSize: "16px", cursor: "pointer" }}>✦ COMMENCER</button>
+          <button onClick={() => onStart(count, playersData.slice(0, count), mode)} style={{ padding: "14px 48px", borderRadius: "10px", background: "linear-gradient(135deg, #4ade80, #22c55e)", border: "none", color: "#052e16", fontFamily: "Tahoma", fontWeight: 900, fontSize: "16px", cursor: "pointer" }}>✦ COMMENCER</button> 
         </div>
 
-        {activeCameraFor !== null && (
+        {/* Caméra popup */}
+        {activeCameraFor !== null && ( 
+          <CameraCapture 
+            onCapture={(imgData) => handleCaptureAndTransform(imgData, activeCameraFor)} // Branché sur notre fonction d'interception
+            onClose={() => setActiveCameraFor(null)} [cite: 133]
+          />
+        )}
 
-  <CameraCapture 
-    onCapture={(imgData) => { updateData(activeCameraFor, "avatar", imgData); setActiveCameraFor(null); }} 
-    onClose={() => setActiveCameraFor(null)} 
-  />
-)}
+        {/* Overlay de chargement IA */}
+        {isProcessingIA && (
+          <div style={{ position: "fixed", inset: 0, zIndex: 200, background: "rgba(0,0,0,0.85)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "15px" }}>
+            <div style={{ fontSize: "40px" }}>🎨🪄</div>
+            <div style={{ color: "#4ade80", fontFamily: "Tahoma", fontWeight: 700, fontSize: "18px", textAlign: "center", padding: "0 20px" }}>
+              Génération de votre caricature...
+            </div>
+            <div style={{ fontSize: "12px", color: "#2d5a3d", fontFamily: "Tahoma" }}>Traitement de l'image en cours</div>
+            <div style={{ width: "30px", height: "30px", border: "4px solid #1a3326", borderTop: "4px solid #4ade80", borderRadius: "50%", animation: "ia-spin 1s linear infinite" }}></div>
+            <style>{`@keyframes ia-spin { to { transform: rotate(360deg); } }`}</style>
+          </div>
+        )}
         </> 
       );
     }
