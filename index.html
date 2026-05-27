@@ -126,7 +126,7 @@
 }
 
     function EvolutionChart({ players, rounds }) {
-      if (rounds.length === 0) return <div style={{ textAlign: "center", color: "#2d5a3d", fontSize: "13px", fontFamily: "Tahoma, 'Trebuchet MS', Geneva, sans-serif", padding: "20px 0", fontStyle: "italic" }}>Aucune manche — le graphique apparaîtra ici</div>;
+      if (rounds.length === 0) return <div style={{ textAlign: "center", color: "#2d5a3d", fontSize: "13px", fontFamily: "Roboto, 'Trebuchet MS', Geneva, sans-serif", padding: "20px 0", fontStyle: "italic" }}>Aucune manche — le graphique apparaîtra ici</div>;
       const data = rounds.map((_, ri) => {
         const point = { round: `M${ri + 1}` };
         players.forEach(p => { let acc = 0; for (let j = 0; j <= ri; j++) acc += rounds[j].scores[p.id] ?? 0; point[p.id] = acc; });
@@ -137,12 +137,12 @@
         if (!active || !payload?.length) return null;
         return (
           <div style={{ background: "#0f2d1e", border: "1px solid #2d5a3d", borderRadius: "8px", padding: "8px 12px" }}>
-            <div style={{ fontSize: "10px", color: "#4ade80", marginBottom: "4px", fontFamily: "Tahoma, 'Trebuchet MS', Geneva, sans-serif" }}>{label}</div>
+            <div style={{ fontSize: "10px", color: "#4ade80", marginBottom: "4px", fontFamily: "Roboto, 'Trebuchet MS', Geneva, sans-serif" }}>{label}</div>
             {[...payload].sort((a, b) => b.value - a.value).map(entry => {
               const pi = players.findIndex(p => p.id === entry.dataKey);
               const ci = SUIT_COLORS[pi % SUIT_COLORS.length];
               return (
-                <div key={entry.dataKey} style={{ display: "flex", gap: "6px", alignItems: "center", fontSize: "12px", fontFamily: "Tahoma, 'Trebuchet MS', Geneva, sans-serif" }}>
+                <div key={entry.dataKey} style={{ display: "flex", gap: "6px", alignItems: "center", fontSize: "12px", fontFamily: "Roboto, 'Trebuchet MS', Geneva, sans-serif" }}>
                   <span style={{ color: ci.accent }}>{ci.suit}</span>
                   <span style={{ color: "#ccc" }}>{players.find(p => p.id === entry.dataKey)?.name}</span>
                   <span style={{ color: "#fff", fontWeight: 700, marginLeft: "auto", paddingLeft: "8px" }}>{entry.value}</span>
@@ -156,8 +156,8 @@
       return (
         <ResponsiveContainer width="100%" height={180}>
           <LineChart data={data} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
-            <XAxis dataKey="round" tick={{ fill: "#2d5a3d", fontSize: 10, fontFamily: "Tahoma, 'Trebuchet MS', Geneva, sans-serif" }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fill: "#2d5a3d", fontSize: 9, fontFamily: "Tahoma, 'Trebuchet MS', Geneva, sans-serif" }} axisLine={false} tickLine={false} />
+            <XAxis dataKey="round" tick={{ fill: "#2d5a3d", fontSize: 10, fontFamily: "Roboto, 'Trebuchet MS', Geneva, sans-serif" }} axisLine={false} tickLine={false} />
+            <YAxis tick={{ fill: "#2d5a3d", fontSize: 9, fontFamily: "Roboto, 'Trebuchet MS', Geneva, sans-serif" }} axisLine={false} tickLine={false} />
             <ReferenceLine y={0} stroke="#2d5a3d" strokeDasharray="3 3" />
             <Tooltip content={<CustomTooltip />} />
             {players.map((p, i) => <Line key={p.id} type="monotone" dataKey={p.id} stroke={SUIT_COLORS[i % SUIT_COLORS.length].accent} strokeWidth={2} dot={{ fill: SUIT_COLORS[i % SUIT_COLORS.length].accent, r: 3 }} activeDot={{ r: 5 }} />)}
@@ -183,23 +183,23 @@
       return (
         <div style={{ background: "rgba(0,0,0,0.35)", border: "1px solid #2d5a3d", borderRadius: "14px", overflow: "hidden", boxShadow: "inset 0 1px 0 #4ade8020" }}>
           <div style={{ background: "rgba(0,0,0,0.3)", borderBottom: "1px solid #2d5a3d", padding: "10px 16px", display: "flex", alignItems: "center", gap: "10px" }}>
-            <span style={{ fontSize: "18px" }}>🃏</span><span style={{ fontFamily: "Tahoma", fontWeight: 700, color: "#4ade80", fontSize: "14px" }}>Manche {roundNumber} (Libre)</span>
+            <span style={{ fontSize: "18px" }}>🃏</span><span style={{ fontFamily: "Roboto", fontWeight: 700, color: "#4ade80", fontSize: "14px" }}>Manche {roundNumber} (Libre)</span>
           </div>
           <div style={{ padding: "14px 16px", display: "flex", flexDirection: "column", gap: "10px" }}>
             {players.map((p, i) => {
               const ci = SUIT_COLORS[i % SUIT_COLORS.length];
               return (
                 <div key={p.id} style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                  <div style={{ flex: 1, fontFamily: "Tahoma", fontWeight: 700, fontSize: "13px", color: ci.accent }}>{p.name}</div>
+                  <div style={{ flex: 1, fontFamily: "Roboto", fontWeight: 700, fontSize: "13px", color: ci.accent }}>{p.name}</div>
                   <input ref={el => refs.current[p.id] = el} type="text" placeholder="0" value={inputs[p.id]} onChange={e => set(p.id, e.target.value)}
                     onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); const next = players[i + 1]; if (next) refs.current[next.id]?.focus(); else validate(); } }}
-                    style={{ width: "80px", background: `${ci.accent}18`, border: `1px solid ${ci.accent}55`, borderRadius: "8px", color: ci.accent, fontFamily: "Tahoma", fontWeight: 700, fontSize: "16px", textAlign: "center", padding: "6px" }} />
+                    style={{ width: "80px", background: `${ci.accent}18`, border: `1px solid ${ci.accent}55`, borderRadius: "8px", color: ci.accent, fontFamily: "Roboto", fontWeight: 700, fontSize: "16px", textAlign: "center", padding: "6px" }} />
                 </div>
               );
             })}
           </div>
           <div style={{ padding: "12px 16px", borderTop: "1px solid #2d5a3d22", display: "flex", justifyContent: "flex-end" }}>
-            <button onClick={validate} disabled={allEmpty} style={{ padding: "10px 28px", borderRadius: "8px", background: allEmpty ? "#1a3326" : "#4ade80", border: "none", color: allEmpty ? "#2d5a3d" : "#052e16", fontFamily: "Tahoma", fontWeight: 700, cursor: allEmpty ? "default" : "pointer" }}>✦ VALIDER</button>
+            <button onClick={validate} disabled={allEmpty} style={{ padding: "10px 28px", borderRadius: "8px", background: allEmpty ? "#1a3326" : "#4ade80", border: "none", color: allEmpty ? "#2d5a3d" : "#052e16", fontFamily: "Roboto", fontWeight: 700, cursor: allEmpty ? "default" : "pointer" }}>✦ VALIDER</button>
           </div>
         </div>
       );
@@ -264,22 +264,22 @@
       return (
         <div style={{ background: "rgba(0,0,0,0.35)", border: "1px solid #2d5a3d", borderRadius: "14px", overflow: "hidden" }}>
           <div style={{ background: "rgba(0,0,0,0.3)", borderBottom: "1px solid #2d5a3d", padding: "10px 16px", display: "flex", alignItems: "center", gap: "10px" }}>
-            <span style={{ fontSize: "18px" }}>🎴</span><span style={{ fontFamily: "Tahoma", fontWeight: 700, color: "#4ade80", fontSize: "14px" }}>Manche {roundNumber} (Calcul Tarot)</span>
+            <span style={{ fontSize: "18px" }}>🎴</span><span style={{ fontFamily: "Roboto", fontWeight: 700, color: "#4ade80", fontSize: "14px" }}>Manche {roundNumber} (Calcul Tarot)</span>
           </div>
           
           <div style={{ padding: "16px", display: "flex", flexDirection: "column", gap: "16px" }}>
             {/* Rôles */}
             <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
               <div style={{ flex: 1, minWidth: "140px" }}>
-                <div style={{ fontSize: "10px", color: "#4ade8066", textTransform: "uppercase", marginBottom: "4px", fontFamily: "Tahoma" }}>Preneur</div>
-                <select value={preneur} onChange={e => setPreneur(parseInt(e.target.value))} style={{ width: "100%", padding: "8px", borderRadius: "6px", background: "#0f2d1e", color: "#a7f3d0", border: "1px solid #2d5a3d", fontFamily: "Tahoma" }}>
+                <div style={{ fontSize: "10px", color: "#4ade8066", textTransform: "uppercase", marginBottom: "4px", fontFamily: "Roboto" }}>Preneur</div>
+                <select value={preneur} onChange={e => setPreneur(parseInt(e.target.value))} style={{ width: "100%", padding: "8px", borderRadius: "6px", background: "#0f2d1e", color: "#a7f3d0", border: "1px solid #2d5a3d", fontFamily: "Roboto" }}>
                   {players.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                 </select>
               </div>
               {players.length === 5 && (
                 <div style={{ flex: 1, minWidth: "140px" }}>
-                  <div style={{ fontSize: "10px", color: "#4ade8066", textTransform: "uppercase", marginBottom: "4px", fontFamily: "Tahoma" }}>Partenaire (Appelé)</div>
-                  <select value={partenaire} onChange={e => setPartenaire(parseInt(e.target.value))} style={{ width: "100%", padding: "8px", borderRadius: "6px", background: "#0f2d1e", color: "#a7f3d0", border: "1px solid #2d5a3d", fontFamily: "Tahoma" }}>
+                  <div style={{ fontSize: "10px", color: "#4ade8066", textTransform: "uppercase", marginBottom: "4px", fontFamily: "Roboto" }}>Partenaire (Appelé)</div>
+                  <select value={partenaire} onChange={e => setPartenaire(parseInt(e.target.value))} style={{ width: "100%", padding: "8px", borderRadius: "6px", background: "#0f2d1e", color: "#a7f3d0", border: "1px solid #2d5a3d", fontFamily: "Roboto" }}>
                     {players.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                   </select>
                 </div>
@@ -288,7 +288,7 @@
 
             {/* Contrat & Bouts */}
             <div>
-              <div style={{ fontSize: "10px", color: "#4ade8066", textTransform: "uppercase", marginBottom: "6px", fontFamily: "Tahoma" }}>Contrat</div>
+              <div style={{ fontSize: "10px", color: "#4ade8066", textTransform: "uppercase", marginBottom: "6px", fontFamily: "Roboto" }}>Contrat</div>
               <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
                 <button onClick={() => setContrat(1)} style={btnStyle(contrat === 1, "#4ade80")}>Petite</button>
                 <button onClick={() => setContrat(2)} style={btnStyle(contrat === 2, "#4ade80")}>Garde</button>
@@ -298,7 +298,7 @@
             </div>
 
             <div>
-              <div style={{ fontSize: "10px", color: "#4ade8066", textTransform: "uppercase", marginBottom: "6px", fontFamily: "Tahoma" }}>Nombre de bouts (Oudlers)</div>
+              <div style={{ fontSize: "10px", color: "#4ade8066", textTransform: "uppercase", marginBottom: "6px", fontFamily: "Roboto" }}>Nombre de bouts (Oudlers)</div>
               <div style={{ display: "flex", gap: "6px" }}>
                 {[0, 1, 2, 3].map(b => (
                   <button key={b} onClick={() => setBouts(b)} style={btnStyle(bouts === b)}>{b}</button>
@@ -308,14 +308,14 @@
 
             {/* Points */}
             <div>
-              <div style={{ fontSize: "10px", color: "#4ade8066", textTransform: "uppercase", marginBottom: "6px", fontFamily: "Tahoma" }}>Points réalisés par l'attaque (0 - 91)</div>
+              <div style={{ fontSize: "10px", color: "#4ade8066", textTransform: "uppercase", marginBottom: "6px", fontFamily: "Roboto" }}>Points réalisés par l'attaque (0 - 91)</div>
               <input type="number" value={points} onChange={e => setPoints(e.target.value)} placeholder="Ex: 42" onKeyDown={e => { if (e.key === "Enter") calculate(); }}
-                style={{ width: "100px", background: "#1a473144", border: "1.5px solid #4ade8088", borderRadius: "8px", color: "#4ade80", fontFamily: "Tahoma", fontWeight: 700, fontSize: "16px", textAlign: "center", padding: "8px", outline: "none" }} />
+                style={{ width: "100px", background: "#1a473144", border: "1.5px solid #4ade8088", borderRadius: "8px", color: "#4ade80", fontFamily: "Roboto", fontWeight: 700, fontSize: "16px", textAlign: "center", padding: "8px", outline: "none" }} />
             </div>
           </div>
 
           <div style={{ padding: "12px 16px", borderTop: "1px solid #2d5a3d22", display: "flex", justifyContent: "flex-end" }}>
-            <button onClick={calculate} disabled={points === ""} style={{ padding: "10px 28px", borderRadius: "8px", background: points === "" ? "#1a3326" : "#4ade80", border: "none", color: points === "" ? "#2d5a3d" : "#052e16", fontFamily: "Tahoma", fontWeight: 700, cursor: points === "" ? "default" : "pointer" }}>✦ CALCULER & VALIDER</button>
+            <button onClick={calculate} disabled={points === ""} style={{ padding: "10px 28px", borderRadius: "8px", background: points === "" ? "#1a3326" : "#4ade80", border: "none", color: points === "" ? "#2d5a3d" : "#052e16", fontFamily: "Roboto", fontWeight: 700, cursor: points === "" ? "default" : "pointer" }}>✦ CALCULER & VALIDER</button>
           </div>
         </div>
       );
@@ -323,7 +323,7 @@
 
     function HistoryTable({ rounds, players, onDelete }) {
       const [confirmDel, setConfirmDel] = useState(null);
-      if (rounds.length === 0) return <div style={{ textAlign: "center", color: "#2d5a3d", fontStyle: "italic", fontFamily: "Tahoma", padding: "20px 0" }}>Aucune manche</div>;
+      if (rounds.length === 0) return <div style={{ textAlign: "center", color: "#2d5a3d", fontStyle: "italic", fontFamily: "Roboto", padding: "20px 0" }}>Aucune manche</div>;
       const totals = players.map(p => totalScore(rounds, p.id));
       const maxTotal = Math.max(...totals);
 
@@ -333,7 +333,7 @@
             <thead>
               <tr>
                 <th style={{ padding: "7px 8px", color: "#2d5a3d", borderBottom: "1px solid #2d5a3d" }}>#</th>
-                {players.map((p, i) => <th key={p.id} style={{ padding: "7px 8px", color: SUIT_COLORS[i % SUIT_COLORS.length].accent, borderBottom: "1px solid #2d5a3d", fontFamily: "Tahoma" }}>{p.name}</th>)}
+                {players.map((p, i) => <th key={p.id} style={{ padding: "7px 8px", color: SUIT_COLORS[i % SUIT_COLORS.length].accent, borderBottom: "1px solid #2d5a3d", fontFamily: "Roboto" }}>{p.name}</th>)}
                 <th style={{ borderBottom: "1px solid #2d5a3d" }} />
               </tr>
             </thead>
@@ -342,11 +342,11 @@
                 const rowMax = Math.max(...players.map(p => r.scores[p.id] ?? 0));
                 return (
                   <tr key={r.id} style={{ borderBottom: "1px solid #1a3326" }}>
-                    <td style={{ padding: "7px 8px", textAlign: "center", color: "#2d5a3d", fontFamily: "Tahoma" }}>M{ri + 1}</td>
+                    <td style={{ padding: "7px 8px", textAlign: "center", color: "#2d5a3d", fontFamily: "Roboto" }}>M{ri + 1}</td>
                     {players.map((p, i) => {
                       const v = r.scores[p.id] ?? 0;
                       const best = v === rowMax && rowMax > 0;
-                      return <td key={p.id} style={{ padding: "7px 8px", textAlign: "center", fontFamily: "Tahoma", color: best ? SUIT_COLORS[i % SUIT_COLORS.length].accent : "#3d7a52", fontWeight: best ? 700 : 400 }}>{v > 0 ? `+${v}` : v}</td>;
+                      return <td key={p.id} style={{ padding: "7px 8px", textAlign: "center", fontFamily: "Roboto", color: best ? SUIT_COLORS[i % SUIT_COLORS.length].accent : "#3d7a52", fontWeight: best ? 700 : 400 }}>{v > 0 ? `+${v}` : v}</td>;
                     })}
                     <td style={{ padding: "3px", textAlign: "center" }}>
                       {confirmDel === r.id ? <button onClick={() => { onDelete(r.id); setConfirmDel(null); }} style={{ background: "#7f1d1d", border: "none", borderRadius: "4px", color: "#fff", padding: "2px 6px" }}>✕</button> : <button onClick={() => setConfirmDel(r.id)} style={{ background: "transparent", border: "none", color: "#2d5a3d", fontSize: "16px", cursor: "pointer" }}>×</button>}
@@ -355,11 +355,11 @@
                 );
               })}
               <tr style={{ borderTop: "2px solid #2d5a3d" }}>
-                <td style={{ padding: "7px 8px", textAlign: "center", color: "#4ade80", fontFamily: "Tahoma", fontWeight: 700 }}>TOT</td>
+                <td style={{ padding: "7px 8px", textAlign: "center", color: "#4ade80", fontFamily: "Roboto", fontWeight: 700 }}>TOT</td>
                 {players.map((p, i) => {
                   const t = totals[i];
                   const win = t === maxTotal && maxTotal > 0;
-                  return <td key={p.id} style={{ padding: "7px 8px", textAlign: "center", fontFamily: "Tahoma", fontWeight: 700, fontSize: "15px", color: win ? SUIT_COLORS[i % SUIT_COLORS.length].accent : "#4ade8088" }}>{win ? "🏆 " : ""}{t}</td>;
+                  return <td key={p.id} style={{ padding: "7px 8px", textAlign: "center", fontFamily: "Roboto", fontWeight: 700, fontSize: "15px", color: win ? SUIT_COLORS[i % SUIT_COLORS.length].accent : "#4ade8088" }}>{win ? "🏆 " : ""}{t}</td>;
                 })}
                 <td />
               </tr>
@@ -434,7 +434,7 @@
     return (
       <div style={{ position: "fixed", inset: 0, zIndex: 100, background: "rgba(0,0,0,0.85)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
         <div style={{ background: "#0f2d1e", padding: "16px", borderRadius: "12px", border: "2px solid #4ade80", textAlign: "center" }}>
-          <div style={{ color: "#4ade80", fontFamily: "Tahoma", fontWeight: 700, marginBottom: "12px" }}>📸 Capture d'Avatar</div>
+          <div style={{ color: "#4ade80", fontFamily: "Roboto", fontWeight: 700, marginBottom: "12px" }}>📸 Capture d'Avatar</div>
           
           <video 
             ref={videoRef} 
@@ -452,13 +452,13 @@
           />
           
           <div style={{ display: "flex", gap: "10px", marginTop: "16px", justifyContent: "center", flexWrap: "wrap" }}>
-            <button onClick={toggleCamera} style={{ padding: "10px", background: "#3b82f6", border: "none", color: "#fff", borderRadius: "8px", fontFamily: "Tahoma", fontWeight: 700, cursor: "pointer", width: "100%" }}>
+            <button onClick={toggleCamera} style={{ padding: "10px", background: "#3b82f6", border: "none", color: "#fff", borderRadius: "8px", fontFamily: "Roboto", fontWeight: 700, cursor: "pointer", width: "100%" }}>
               🔄 Retourner la caméra
             </button>
-            <button onClick={takePhoto} style={{ padding: "10px 20px", background: "#4ade80", border: "none", color: "#052e16", borderRadius: "8px", fontFamily: "Tahoma", fontWeight: 700, cursor: "pointer", flex: 1 }}>
+            <button onClick={takePhoto} style={{ padding: "10px 20px", background: "#4ade80", border: "none", color: "#052e16", borderRadius: "8px", fontFamily: "Roboto", fontWeight: 700, cursor: "pointer", flex: 1 }}>
               Prendre la photo
             </button>
-            <button onClick={onClose} style={{ padding: "10px 20px", background: "transparent", border: "1px solid #ef4444", color: "#ef4444", fontFamily: "Tahoma", borderRadius: "8px", cursor: "pointer", flex: 1 }}>
+            <button onClick={onClose} style={{ padding: "10px 20px", background: "transparent", border: "1px solid #ef4444", color: "#ef4444", fontFamily: "Roboto", borderRadius: "8px", cursor: "pointer", flex: 1 }}>
               Annuler
             </button>
           </div>
@@ -544,7 +544,7 @@
       return (
         <>
         <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "32px 16px", position: "relative", zIndex: 1 }}>
-          <h1 style={{ fontFamily: "Tahoma", fontWeight: 900, fontSize: "clamp(30px, 7vw, 48px)", color: "#f0fdf4", letterSpacing: "0.04em", marginBottom: "32px", textShadow: "0 0 40px #4ade8044" }}>SCOREBOARD</h1>
+          <h1 style={{ fontFamily: "Roboto", fontWeight: 900, fontSize: "clamp(30px, 7vw, 48px)", color: "#f0fdf4", letterSpacing: "0.04em", marginBottom: "32px", textShadow: "0 0 40px #4ade8044" }}>SCOREBOARD</h1>
           
           {/* Mode de jeu */}
           <div style={{ 
@@ -676,7 +676,7 @@
                 const teamColor = SUIT_COLORS[teamIdx * 2].accent;
                 return (
                   <div key={teamIdx} style={{ background: "rgba(0,0,0,0.3)", border: "1px solid #2d5a3d", borderRadius: "12px", padding: "16px" }}>
-                    <div style={{ fontSize: "11px", color: teamColor, textTransform: "uppercase", fontFamily: "Tahoma", fontWeight: 700, marginBottom: "12px" }}>Équipe {teamIdx + 1}</div>
+                    <div style={{ fontSize: "11px", color: teamColor, textTransform: "uppercase", fontFamily: "Roboto", fontWeight: 700, marginBottom: "12px" }}>Équipe {teamIdx + 1}</div>
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
                       {[0, 1].map(playerIdx => {
                         const i = teamIdx * 2 + playerIdx;
@@ -691,7 +691,7 @@
                               </div>
                             </div>
                             {playersData[i].type === "name" ? (
-                              <input value={playersData[i].name} onChange={e => updateData(i, "name", e.target.value)} placeholder={`Joueur ${i + 1}`} style={{ background: "rgba(0,0,0,0.2)", border: "none", borderRadius: "6px", color: "#a7f3d0", fontFamily: "Tahoma", fontSize: "12px", padding: "8px", outline: "none", width: "100%" }} />
+                              <input value={playersData[i].name} onChange={e => updateData(i, "name", e.target.value)} placeholder={`Joueur ${i + 1}`} style={{ background: "rgba(0,0,0,0.2)", border: "none", borderRadius: "6px", color: "#a7f3d0", fontFamily: "Roboto", fontSize: "12px", padding: "8px", outline: "none", width: "100%" }} />
                             ) : (
                               <div style={{ display: "flex", justifyContent: "center" }}>
                                 {playersData[i].avatar ? (
@@ -723,7 +723,7 @@
                       </div>
                     </div>
                     {playersData[i].type === "name" ? (
-                      <input value={playersData[i].name} onChange={e => updateData(i, "name", e.target.value)} placeholder={`Joueur ${i + 1}`} style={{ background: "rgba(0,0,0,0.2)", border: "none", borderRadius: "6px", color: "#a7f3d0", fontFamily: "Tahoma", fontSize: "12px", padding: "8px", outline: "none", width: "100%" }} />
+                      <input value={playersData[i].name} onChange={e => updateData(i, "name", e.target.value)} placeholder={`Joueur ${i + 1}`} style={{ background: "rgba(0,0,0,0.2)", border: "none", borderRadius: "6px", color: "#a7f3d0", fontFamily: "Roboto", fontSize: "12px", padding: "8px", outline: "none", width: "100%" }} />
                     ) : (
                       <div style={{ display: "flex", justifyContent: "center" }}>
                         {playersData[i].avatar ? (
@@ -739,7 +739,7 @@
             </div>
           )}
 
-          <button onClick={() => onStart(count, playersData.slice(0, count), mode)} style={{ padding: "14px 48px", borderRadius: "10px", background: "linear-gradient(135deg, #4ade80, #22c55e)", border: "none", color: "#052e16", fontFamily: "Tahoma", fontWeight: 900, fontSize: "16px", cursor: "pointer" }}>✦ COMMENCER</button>
+          <button onClick={() => onStart(count, playersData.slice(0, count), mode)} style={{ padding: "14px 48px", borderRadius: "10px", background: "linear-gradient(135deg, #4ade80, #22c55e)", border: "none", color: "#052e16", fontFamily: "Roboto", fontWeight: 900, fontSize: "16px", cursor: "pointer" }}>✦ COMMENCER</button>
         </div>
 
         {/* Caméra popup */}
@@ -754,10 +754,10 @@
         {isProcessingIA && (
           <div style={{ position: "fixed", inset: 0, zIndex: 200, background: "rgba(0,0,0,0.85)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "15px" }}>
             <div style={{ fontSize: "40px" }}>🎨🪄</div>
-            <div style={{ color: "#4ade80", fontFamily: "Tahoma", fontWeight: 700, fontSize: "18px", textAlign: "center", padding: "0 20px" }}>
+            <div style={{ color: "#4ade80", fontFamily: "Roboto", fontWeight: 700, fontSize: "18px", textAlign: "center", padding: "0 20px" }}>
               Génération de votre caricature...
             </div>
-            <div style={{ fontSize: "12px", color: "#2d5a3d", fontFamily: "Tahoma" }}>Traitement de l'image en cours</div>
+            <div style={{ fontSize: "12px", color: "#2d5a3d", fontFamily: "Roboto" }}>Traitement de l'image en cours</div>
             <div style={{ width: "30px", height: "30px", border: "4px solid #1a3326", borderTop: "4px solid #4ade80", borderRadius: "50%", animation: "ia-spin 1s linear infinite" }}></div>
             <style>{`@keyframes ia-spin { to { transform: rotate(360deg); } }`}</style>
           </div>
@@ -811,16 +811,16 @@
             {/* --- EN-TÊTE ET NAVIGATION --- */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "#0f2d1e", padding: "12px 20px", borderRadius: "12px", border: "1px solid #2d5a3d" }}>
               <div style={{ display: "flex", gap: "10px" }}>
-                <button onClick={() => setTab("saisie")} style={{ padding: "8px 16px", borderRadius: "8px", background: tab === "saisie" ? "#4ade80" : "transparent", color: tab === "saisie" ? "#052e16" : "#4ade80", border: tab === "saisie" ? "none" : "1px solid #2d5a3d", fontFamily: "Tahoma", fontWeight: 700, cursor: "pointer" }}>Saisie</button>
-                <button onClick={() => setTab("historique")} style={{ padding: "8px 16px", borderRadius: "8px", background: tab === "historique" ? "#4ade80" : "transparent", color: tab === "historique" ? "#052e16" : "#4ade80", border: tab === "historique" ? "none" : "1px solid #2d5a3d", fontFamily: "Tahoma", fontWeight: 700, cursor: "pointer" }}>Historique</button>
+                <button onClick={() => setTab("saisie")} style={{ padding: "8px 16px", borderRadius: "8px", background: tab === "saisie" ? "#4ade80" : "transparent", color: tab === "saisie" ? "#052e16" : "#4ade80", border: tab === "saisie" ? "none" : "1px solid #2d5a3d", fontFamily: "Roboto", fontWeight: 700, cursor: "pointer" }}>Saisie</button>
+                <button onClick={() => setTab("historique")} style={{ padding: "8px 16px", borderRadius: "8px", background: tab === "historique" ? "#4ade80" : "transparent", color: tab === "historique" ? "#052e16" : "#4ade80", border: tab === "historique" ? "none" : "1px solid #2d5a3d", fontFamily: "Roboto", fontWeight: 700, cursor: "pointer" }}>Historique</button>
               </div>
-              <button onClick={() => setConfirmReset(true)} style={{ padding: "8px 16px", borderRadius: "8px", background: "#7f1d1d", color: "#fca5a5", border: "none", fontFamily: "Tahoma", fontWeight: 700, cursor: "pointer" }}>Quitter</button>
+              <button onClick={() => setConfirmReset(true)} style={{ padding: "8px 16px", borderRadius: "8px", background: "#7f1d1d", color: "#fca5a5", border: "none", fontFamily: "Roboto", fontWeight: 700, cursor: "pointer" }}>Quitter</button>
             </div>
 
             {/* --- CONFIRMATION DE SORTIE --- */}
             {confirmReset && (
               <div style={{ background: "#7f1d1d22", border: "1px solid #ef4444", borderRadius: "12px", padding: "16px", textAlign: "center" }}>
-                <div style={{ color: "#fca5a5", fontFamily: "Tahoma", fontWeight: 700, marginBottom: "12px" }}>Voulez-vous vraiment quitter ? La partie en cours sera perdue.</div>
+                <div style={{ color: "#fca5a5", fontFamily: "Roboto", fontWeight: 700, marginBottom: "12px" }}>Voulez-vous vraiment quitter ? La partie en cours sera perdue.</div>
                 <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
                   <button onClick={reset} style={{ padding: "8px 16px", borderRadius: "6px", background: "#ef4444", color: "#fff", border: "none", fontWeight: 700, cursor: "pointer" }}>Oui, quitter</button>
                   <button onClick={() => setConfirmReset(false)} style={{ padding: "8px 16px", borderRadius: "6px", background: "transparent", border: "1px solid #fca5a5", color: "#fca5a5", fontWeight: 700, cursor: "pointer" }}>Annuler</button>
@@ -850,11 +850,11 @@
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
                 <div style={{ background: "rgba(0,0,0,0.35)", border: "1px solid #2d5a3d", borderRadius: "14px", padding: "16px" }}>
-                  <div style={{ fontFamily: "Tahoma", fontWeight: 700, color: "#4ade80", fontSize: "14px", marginBottom: "16px" }}>Évolution des scores</div>
+                  <div style={{ fontFamily: "Roboto", fontWeight: 700, color: "#4ade80", fontSize: "14px", marginBottom: "16px" }}>Évolution des scores</div>
                   <EvolutionChart players={players} rounds={rounds} />
                 </div>
                 <div style={{ background: "rgba(0,0,0,0.35)", border: "1px solid #2d5a3d", borderRadius: "14px", padding: "16px" }}>
-                  <div style={{ fontFamily: "Tahoma", fontWeight: 700, color: "#4ade80", fontSize: "14px", marginBottom: "16px" }}>Tableau des manches</div>
+                  <div style={{ fontFamily: "Roboto", fontWeight: 700, color: "#4ade80", fontSize: "14px", marginBottom: "16px" }}>Tableau des manches</div>
                   <HistoryTable rounds={rounds} players={players} onDelete={deleteRound} />
                 </div>
               </div>
@@ -939,7 +939,7 @@
       return (
         <div style={{ background: "rgba(0,0,0,0.35)", border: "1px solid #2d5a3d", borderRadius: "14px", overflow: "hidden" }}>
           <div style={{ background: "rgba(0,0,0,0.3)", borderBottom: "1px solid #2d5a3d", padding: "10px 16px", display: "flex", alignItems: "center", gap: "10px" }}>
-            <span style={{ fontSize: "18px" }}>♠️</span><span style={{ fontFamily: "Tahoma", fontWeight: 700, color: "#4ade80", fontSize: "14px" }}>Manche {roundNumber} (Calcul Belote)</span>
+            <span style={{ fontSize: "18px" }}>♠️</span><span style={{ fontFamily: "Roboto", fontWeight: 700, color: "#4ade80", fontSize: "14px" }}>Manche {roundNumber} (Calcul Belote)</span>
           </div>
           
           <div style={{ padding: "16px", display: "flex", flexDirection: "column", gap: "16px" }}>
@@ -947,8 +947,8 @@
             {/* L'équipe Attaquante */}
             <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
               <div style={{ flex: 1, minWidth: "140px" }}>
-                <div style={{ fontSize: "10px", color: "#4ade8066", textTransform: "uppercase", marginBottom: "4px", fontFamily: "Tahoma" }}>Équipe Preneuse (Attaque)</div>
-                <select value={preneur} onChange={e => setPreneur(parseInt(e.target.value))} style={{ width: "100%", padding: "8px", borderRadius: "6px", background: "#0f2d1e", color: "#a7f3d0", border: "1px solid #2d5a3d", fontFamily: "Tahoma" }}>
+                <div style={{ fontSize: "10px", color: "#4ade8066", textTransform: "uppercase", marginBottom: "4px", fontFamily: "Roboto" }}>Équipe Preneuse (Attaque)</div>
+                <select value={preneur} onChange={e => setPreneur(parseInt(e.target.value))} style={{ width: "100%", padding: "8px", borderRadius: "6px", background: "#0f2d1e", color: "#a7f3d0", border: "1px solid #2d5a3d", fontFamily: "Roboto" }}>
                   {players.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                 </select>
               </div>
@@ -956,7 +956,7 @@
 
             {/* Options Spéciales */}
             <div>
-              <div style={{ fontSize: "10px", color: "#4ade8066", textTransform: "uppercase", marginBottom: "6px", fontFamily: "Tahoma" }}>Belote et Rebelote (+20)</div>
+              <div style={{ fontSize: "10px", color: "#4ade8066", textTransform: "uppercase", marginBottom: "6px", fontFamily: "Roboto" }}>Belote et Rebelote (+20)</div>
               <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
                 <button onClick={() => setBelote("none")} style={btnStyle(belote === "none")}>Aucune</button>
                 <button onClick={() => setBelote("attaque")} style={btnStyle(belote === "attaque")}>Attaque</button>
@@ -965,7 +965,7 @@
             </div>
 
             <div>
-              <div style={{ fontSize: "10px", color: "#4ade8066", textTransform: "uppercase", marginBottom: "6px", fontFamily: "Tahoma" }}>Capot (252 pts)</div>
+              <div style={{ fontSize: "10px", color: "#4ade8066", textTransform: "uppercase", marginBottom: "6px", fontFamily: "Roboto" }}>Capot (252 pts)</div>
               <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
                 <button onClick={() => setCapot("none")} style={btnStyle(capot === "none")}>Aucun</button>
                 <button onClick={() => setCapot("attaque")} style={btnStyle(capot === "attaque")}>Attaque</button>
@@ -976,15 +976,15 @@
             {/* Points */}
             {capot === "none" && (
               <div>
-                <div style={{ fontSize: "10px", color: "#4ade8066", textTransform: "uppercase", marginBottom: "6px", fontFamily: "Tahoma" }}>Points de l'attaque (sans belote, max 162)</div>
+                <div style={{ fontSize: "10px", color: "#4ade8066", textTransform: "uppercase", marginBottom: "6px", fontFamily: "Roboto" }}>Points de l'attaque (sans belote, max 162)</div>
                 <input type="number" value={points} onChange={e => setPoints(e.target.value)} placeholder="Ex: 92" onKeyDown={e => { if (e.key === "Enter") calculate(); }}
-                  style={{ width: "100px", background: "#1a473144", border: "1.5px solid #4ade8088", borderRadius: "8px", color: "#4ade80", fontFamily: "Tahoma", fontWeight: 700, fontSize: "16px", textAlign: "center", padding: "8px", outline: "none" }} />
+                  style={{ width: "100px", background: "#1a473144", border: "1.5px solid #4ade8088", borderRadius: "8px", color: "#4ade80", fontFamily: "Roboto", fontWeight: 700, fontSize: "16px", textAlign: "center", padding: "8px", outline: "none" }} />
               </div>
             )}
           </div>
 
           <div style={{ padding: "12px 16px", borderTop: "1px solid #2d5a3d22", display: "flex", justifyContent: "flex-end" }}>
-            <button onClick={calculate} disabled={points === "" && capot === "none"} style={{ padding: "10px 28px", borderRadius: "8px", background: (points === "" && capot === "none") ? "#1a3326" : "#4ade80", border: "none", color: (points === "" && capot === "none") ? "#2d5a3d" : "#052e16", fontFamily: "Tahoma", fontWeight: 700, cursor: (points === "" && capot === "none") ? "default" : "pointer" }}>✦ CALCULER & VALIDER</button>
+            <button onClick={calculate} disabled={points === "" && capot === "none"} style={{ padding: "10px 28px", borderRadius: "8px", background: (points === "" && capot === "none") ? "#1a3326" : "#4ade80", border: "none", color: (points === "" && capot === "none") ? "#2d5a3d" : "#052e16", fontFamily: "Roboto", fontWeight: 700, cursor: (points === "" && capot === "none") ? "default" : "pointer" }}>✦ CALCULER & VALIDER</button>
           </div>
         </div>
       );
